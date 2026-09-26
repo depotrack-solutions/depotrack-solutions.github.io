@@ -1,0 +1,376 @@
+<title>DepoTrack Solutions</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js"></script>
+
+<style>
+  body{ background:#EEF0E9; margin:0; }
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+  :root { scroll-behavior: smooth; }
+  .site-shell { --bg:#EEF0E9; --panel:#FBFCF8; --ink:#151B21; --sub:#526069; --line:#C9D0CA; --line-soft:#DCE0D9; --amber:#C9821E; --blue:#2B5C86; --green:#2F7D4F; background:var(--bg); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; font-size:16px; line-height:1.6; min-height:100vh; position:relative; isolation:isolate; }
+  :root[data-theme='dark'] .site-shell { --bg:#12161C; --panel:#1A2029; --ink:#EEF0E9; --sub:#AAB6BD; --line:#394550; --line-soft:#29333D; --amber:#E7B24A; --blue:#78ADD3; --green:#6BC38C; }
+  .site-shell * { box-sizing:border-box; }
+  .site-shell::before { content:''; position:absolute; inset:0; pointer-events:none; z-index:-1; background-image:linear-gradient(to right,transparent calc(25% - .5px),var(--line-soft) 25%,transparent calc(25% + .5px),transparent calc(50% - .5px),var(--line-soft) 50%,transparent calc(50% + .5px),transparent calc(75% - .5px),var(--line-soft) 75%,transparent calc(75% + .5px)); opacity:.32; }
+  .site-shell::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:60; background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(17,24,31,.025) 4px); }
+  .site-shell a { color:inherit; text-decoration:none; }
+  .site-shell button { cursor:pointer; }
+  .site-shell a:focus-visible,.site-shell button:focus-visible { outline:2px solid var(--amber); outline-offset:4px; }
+  .wrap { width:min(100% - 80px, 1400px); margin-inline:auto; }
+  .site-shell h1,.site-shell h2,.site-shell h3 { font-family:'Barlow Condensed',Impact,sans-serif; line-height:1; font-weight:700; margin:0; }
+  .site-shell p { margin:0; }
+  .site-shell .line-badge { font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; line-height:1; min-width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border:1px solid currentColor; color:var(--blue); font-variant-numeric:tabular-nums; }
+  .site-header { height:86px; background:var(--panel); border-bottom:1px solid var(--line); }
+  .site-header-inner { display:flex; align-items:center; height:100%; gap:34px; }
+  .brand { display:inline-flex; align-items:center; gap:12px; white-space:nowrap; }
+  .brand-mark { display:grid; place-items:center; width:39px; height:39px; background:#2B5C86; color:#fff; font:700 17px 'Barlow Condensed',sans-serif; letter-spacing:.03em; }
+  .brand-name { font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; font-size:23px; font-weight:700; letter-spacing:.015em; line-height:1; }
+  .brand-name span { color:var(--blue); }
+  .header-nav { display:flex; align-items:center; gap:38px; margin-left:auto; height:100%; }
+  .header-nav a { display:inline-flex; align-items:center; gap:4px; height:100%; border-bottom:2px solid transparent; font-size:13px; font-weight:600; transition:color .2s,border-color .2s; }
+  .header-nav a:hover { color:var(--blue); border-bottom-color:var(--amber); }
+  .theme-toggle { display:grid; place-items:center; width:41px; height:41px; flex:none; color:var(--ink); background:transparent; border:1px solid var(--line); transition:background .2s; }
+  .theme-toggle:hover { background:var(--bg); }
+  .hero { padding:0 0 76px; }
+  .hero-topline { height:60px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:16px; color:var(--sub); font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.08em; }
+  .hero-topline span:first-child { display:flex; align-items:center; gap:10px; }
+  .green-pulse { display:inline-block; flex:none; width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 14%,transparent); }
+  .hero-copy { padding:72px 0 70px; }
+  .hero-kicker,.section-code,.positioning-label { display:flex; align-items:center; gap:12px; color:var(--blue); font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.08em; }
+  .hero h1 { margin-top:27px; max-width:1240px; font-size:clamp(54px,7.2vw,118px); letter-spacing:-.018em; text-transform:uppercase; }
+  .hero h1 em { font-style:normal; color:var(--blue); }
+  .hero-period { color:var(--amber); }
+  .hero-bottom { margin-top:36px; padding-top:26px; border-top:1px solid var(--line); display:flex; align-items:flex-start; justify-content:space-between; gap:40px; }
+  .hero-bottom p { max-width:650px; font-size:18px; line-height:1.55; color:var(--sub); }
+  .hero-action { min-width:270px; display:flex; flex-direction:column; align-items:flex-start; gap:11px; }
+  .primary-cta { display:inline-flex; align-items:center; justify-content:space-between; gap:30px; padding:15px 18px; background:var(--amber); color:#14181D!important; font-weight:600; font-size:15px; border:1px solid var(--amber); transition:background .2s,transform .2s; }
+  .primary-cta:hover { transform:translateY(-2px); background:#E7B24A; }
+  .hero-action>span { font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.08em; color:var(--sub); }
+  .departure-board { position:relative; overflow:hidden; background:#14181D; color:#DDA349; border:1px solid #303842; box-shadow:0 15px 32px rgba(10,14,18,.13); font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
+  .departure-board::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(0deg,rgba(0,0,0,.15) 0px,rgba(0,0,0,.15) 1px,transparent 1px,transparent 4px); pointer-events:none; }
+  .board-top,.board-bottom { display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:10px; letter-spacing:.1em; }
+  .board-top { min-height:50px; padding:0 28px; border-bottom:1px solid #35404A; color:#BCC5C8; }
+  .board-top>span:first-child { display:flex; align-items:center; gap:10px; }
+  .board-live { display:inline-block; width:6px; height:6px; background:#77BD84; border-radius:50%; box-shadow:0 0 8px #77BD84; }
+  .board-plus { margin-left:25px; color:#DDA349; font-size:16px; }
+  .board-head,.board-row { display:grid; grid-template-columns:100px minmax(0,1fr) 230px; align-items:center; gap:16px; }
+  .board-head { min-height:42px; padding:0 28px; color:#89949B; font-size:10px; letter-spacing:.12em; border-bottom:1px solid #35404A; }
+  .board-row { min-height:56px; padding:0 28px; border-bottom:1px solid #293039; font-size:clamp(13px,1.5vw,19px); font-weight:500; letter-spacing:.035em; text-shadow:0 0 10px rgba(231,178,74,.25); }
+  .board-row>span:first-child { font-size:16px; color:#F0C270; }
+  .board-status { display:flex; align-items:center; gap:12px; color:#F0C270; font-size:clamp(10px,1vw,13px); white-space:nowrap; }
+  .status-dot { width:6px; height:6px; flex:none; background:#73B684; box-shadow:0 0 8px #73B684; }
+  .board-extra { border-bottom:0; }
+  .board-flip { animation:boardFlip .5s ease-out; }
+  .board-boot { animation:boardBoot .45s ease-out both; animation-delay:calc(.2s + var(--row) * .18s); }
+  @keyframes boardBoot { from { opacity:0; transform:translateY(7px); filter:brightness(2); } to { opacity:1; transform:translateY(0); filter:brightness(1); } }
+  @keyframes boardFlip { from { opacity:.45; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+  .board-bottom { min-height:36px; padding:0 28px; color:#8CA0A0; background:#191E24; border-top:1px solid #35404A; font-size:9px; }
+  .board-bottom span:first-child { color:#83BD8D; }
+  .positioning { background:var(--blue); color:#fff; }
+  :root[data-theme='dark'] .positioning { background:#214B6A; }
+  .positioning-inner { min-height:255px; padding-block:43px; display:grid; grid-template-columns:190px 1fr 175px; gap:45px; align-items:center; }
+  .positioning-label { color:#C9DCE7; align-self:start; white-space:nowrap; }
+  .positioning-label .line-badge { color:#fff; border-color:#9BBBD0; }
+  .positioning p { max-width:800px; font-family:'Barlow Condensed',sans-serif; font-weight:600; line-height:1.1; font-size:clamp(30px,3.5vw,56px); text-transform:uppercase; }
+  .positioning p strong { color:#F2C46C; font-weight:700; }
+  .positioning-end { align-self:end; font:500 10px/1.8 'IBM Plex Mono',monospace; color:#BDD2E2; }
+  .section { padding:110px 0; scroll-margin-top:18px; }
+  .section-heading { display:grid; grid-template-columns:195px 1fr; gap:40px; padding-bottom:38px; border-bottom:1px solid var(--line); }
+  .section-heading h2 { max-width:850px; font-size:clamp(42px,5vw,76px); letter-spacing:-.01em; }
+  .section-heading p { margin-top:16px; max-width:650px; color:var(--sub); font-size:17px; }
+  .service-grid { display:grid; grid-template-columns:repeat(3,1fr); margin-top:24px; border:1px solid var(--line); background:var(--panel); }
+  .service-card { min-height:355px; padding:28px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden; border-right:1px solid var(--line); transition:background .25s; }
+  .service-card:last-child { border-right:0; }
+  .service-card:hover { background:var(--bg); }
+  .service-card::after { content:''; position:absolute; left:0; right:0; top:-2px; height:2px; background:#A94F41; opacity:0; pointer-events:none; }
+  .service-card:hover::after { opacity:.8; animation:scanner .7s ease-in-out forwards; }
+  @keyframes scanner { from { top:0; } to { top:100%; } }
+  .service-card-top { display:flex; align-items:flex-start; justify-content:space-between; color:var(--blue); }
+  .service-number { display:grid; place-items:center; width:53px; height:53px; background:#2B5C86; color:#fff; font:600 19px 'IBM Plex Mono',monospace; }
+  .service-card h3 { font-size:clamp(29px,2.8vw,42px); text-transform:uppercase; }
+  .service-card p { margin-top:16px; max-width:340px; color:var(--sub); font-size:16px; line-height:1.55; }
+  .service-tag { border-top:1px solid var(--line); padding-top:15px; color:var(--blue); font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.1em; }
+  .case-section { background:var(--panel); border-block:1px solid var(--line); }
+  .case-layout { margin-top:25px; display:grid; grid-template-columns:minmax(0,1.35fr) minmax(290px,.65fr); border:1px solid var(--line); }
+  .yard-dashboard { min-width:0; background:#182129; color:#DDE6E8; }
+  .yard-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:50px; padding:10px 22px; border-bottom:1px solid #3A4650; font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.05em; }
+  .yard-toolbar>span:first-child { display:flex; align-items:center; gap:10px; }
+  .yard-content { padding:25px 25px 30px; background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px); background-size:30px 30px; }
+  .yard-lane { display:flex; justify-content:space-between; color:#8499A4; font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.08em; padding:0 2px 12px; }
+  .yard-lane:last-child { padding:14px 2px 0; }
+  .yard-grid { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:8px; }
+  .yard-slot { aspect-ratio:1.55; min-height:45px; padding:7px; display:flex; justify-content:space-between; align-items:flex-start; font:500 10px 'IBM Plex Mono',monospace; border:1px solid #72808A; color:#8FA0AA; background:#1B252C; }
+  .yard-slot.occupied { background:#C9A227; border-color:#E7C24C; color:#231A00; }
+  .yard-slot.maintenance { background:#8B2E22; border-color:#C9483A; color:#FFE3DE; }
+  .yard-slot.empty { background:#B7E4C7; border-color:#7CC79C; color:#123A22; }
+  .slot-symbol { font-size:12px; }
+  .yard-legend { display:flex; flex-wrap:wrap; gap:18px; padding:14px 22px; border-top:1px solid #3A4650; font:500 9px 'IBM Plex Mono',monospace; color:#ABBBC3; }
+  .yard-legend span { display:inline-flex; align-items:center; gap:7px; }
+  .legend-square { display:inline-block; width:10px; height:10px; }
+  .legend-square.blue { background:#C9A227; }.legend-square.amber { background:#8B2E22; }.legend-square.outline { background:#B7E4C7; border:1px solid #7CC79C; }
+  .case-aside { padding:26px 30px; background:var(--bg); border-left:1px solid var(--line); display:flex; flex-direction:column; }
+  .case-aside-label { font:600 10px 'IBM Plex Mono',monospace; letter-spacing:.08em; color:var(--blue); }
+  .case-aside>p { margin:25px 0 30px; font-size:17px; line-height:1.55; }
+  .case-stats { margin-top:auto; border-top:1px solid var(--line); }
+  .case-stats>div { display:grid; grid-template-columns:98px 1fr; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); }
+  .case-stats strong { font:600 29px 'IBM Plex Mono',monospace; letter-spacing:-.07em; color:var(--blue); }
+  .case-stats span { font:500 10px/1.4 'IBM Plex Mono',monospace; letter-spacing:.04em; color:var(--sub); }
+  .process-list { margin-top:24px; border-top:1px solid var(--line); }
+  .process-step { display:grid; grid-template-columns:195px minmax(180px,.8fr) 1.2fr 22px; gap:35px; align-items:center; min-height:128px; border-bottom:1px solid var(--line); }
+  .process-index { font:600 11px 'IBM Plex Mono',monospace; color:var(--blue); }
+  .process-step h3 { font-size:34px; text-transform:uppercase; }
+  .process-step p { max-width:490px; color:var(--sub); font-size:16px; }
+  .process-cross { color:var(--amber); font:400 24px 'IBM Plex Mono',monospace; }
+  .contact-section { background:var(--panel); border-top:1px solid var(--line); padding-bottom:120px; }
+  .contact-panel { display:grid; grid-template-columns:1fr 1fr; margin-top:24px; border:1px solid var(--line); }
+  .contact-intro { padding:44px; background:var(--blue); color:#fff; }
+  :root[data-theme='dark'] .contact-intro { background:#214B6A; }
+  .contact-signal { display:flex; align-items:center; gap:10px; color:#D8EBF1; font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.06em; }
+  .contact-intro h3 { margin:75px 0 20px; max-width:490px; font-size:clamp(38px,4vw,60px); text-transform:uppercase; }
+  .contact-intro p { max-width:500px; line-height:1.65; color:#E2EDF3; }
+  .contact-desk { padding:44px; display:flex; flex-direction:column; align-items:flex-start; min-width:0; }
+  .desk-label,.desk-foot { color:var(--blue); font:600 10px 'IBM Plex Mono',monospace; letter-spacing:.07em; }
+  .email-address { margin:75px 0 25px; display:inline-flex; align-items:center; gap:9px; max-width:100%; overflow-wrap:anywhere; font:500 clamp(17px,2.15vw,29px)/1.3 'IBM Plex Mono',monospace; border-bottom:1px solid var(--amber); padding-bottom:13px; }
+  .email-address:hover { color:var(--blue); }
+  .email-address svg { flex:none; }
+  .copy-button { display:inline-flex; align-items:center; gap:11px; border:1px solid var(--ink); padding:12px 17px; background:transparent; color:var(--ink); font:600 12px 'IBM Plex Sans',sans-serif; transition:background .2s,color .2s; }
+  .copy-button:hover { background:var(--ink); color:var(--panel); }
+  .copy-error { margin-top:10px; font-size:13px; color:var(--amber); }
+  .desk-foot { margin-top:auto; padding-top:35px; }
+  .site-footer { background:#172A39; color:#E8F0F2; border-top:4px solid #2B5C86; }
+  .footer-inner { min-height:96px; display:flex; align-items:center; justify-content:space-between; gap:24px; font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.03em; }
+  .footer-inner>div { display:flex; align-items:center; gap:7px; }
+  .footer-inner>div strong { font-family:'Barlow Condensed',sans-serif; font-size:18px; text-transform:uppercase; letter-spacing:0; }
+  .footer-inner>div span:last-child { color:#AABDC6; }
+  .footer-terminus { width:13px; height:13px; border:3px solid #E7B24A; border-radius:50%; margin-right:10px; }
+  .footer-inner a { white-space:nowrap; color:#E7B24A; }
+  .footer-inner a:hover { text-decoration:underline; }
+  @media (max-width:1100px) { .wrap { width:min(100% - 56px,1400px); } .positioning-inner { grid-template-columns:155px 1fr; } .positioning-end { display:none; } .case-layout { grid-template-columns:1fr; } .case-aside { border-left:0; border-top:1px solid var(--line); } .case-stats { display:grid; grid-template-columns:repeat(3,1fr); } .case-stats>div { grid-template-columns:1fr; } .process-step { grid-template-columns:115px minmax(180px,.8fr) 1.2fr 20px; gap:18px; } }
+  @media (max-width:700px) { .wrap { width:calc(100% - 36px); } .site-header { height:auto; } .site-header-inner { flex-wrap:wrap; gap:0; padding-top:14px; } .brand { margin-right:auto; } .brand-name { font-size:20px; } .theme-toggle { width:37px; height:37px; } .header-nav { margin:10px 0 0; width:100%; height:44px; justify-content:space-between; gap:12px; border-top:1px solid var(--line); } .header-nav a { font-size:12px; } .hero { padding-bottom:50px; } .hero-topline { height:50px; font-size:9px; } .hero-topline>span:last-child { display:none; } .hero-copy { padding:49px 0 47px; } .hero h1 { font-size:clamp(45px,10.5vw,72px); line-height:.96; margin-top:22px; } .desktop-break { display:none; } .hero-bottom { flex-direction:column; margin-top:32px; gap:25px; } .hero-bottom p { font-size:16px; } .hero-action { min-width:0; } .board-top { padding:0 13px; font-size:9px; } .board-head,.board-row { grid-template-columns:42px minmax(0,1fr) 65px; gap:7px; padding-inline:13px; } .board-head { font-size:9px; } .board-row { min-height:53px; font-size:clamp(10px,2.9vw,14px); letter-spacing:-.015em; } .board-row>span:first-child { font-size:12px; } .board-status { font-size:8px; line-height:1.2; white-space:normal; gap:4px; } .board-status .status-dot { width:5px; height:5px; } .board-bottom { padding-inline:13px; font-size:8px; } .board-bottom span:last-child { display:none; } .positioning-inner { min-height:0; padding-block:35px 42px; display:block; } .positioning p { margin-top:25px; font-size:38px; } .section { padding:72px 0; } .section-heading { display:block; padding-bottom:28px; } .section-heading h2 { margin-top:25px; font-size:clamp(42px,10vw,58px); } .section-heading p { font-size:16px; } .service-grid { grid-template-columns:1fr; } .service-card { min-height:290px; border-right:0; border-bottom:1px solid var(--line); padding:23px; } .service-card:last-child { border-bottom:0; } .service-card h3 { font-size:37px; } .yard-toolbar { padding:10px; font-size:9px; } .yard-toolbar>span:last-child { display:none; } .yard-content { padding:14px 10px; } .yard-grid { grid-template-columns:repeat(6,minmax(0,1fr)); gap:5px; } .yard-slot { min-height:36px; padding:4px; font-size:9px; } .yard-legend { gap:10px; padding:10px; font-size:8px; } .case-aside { padding:25px; } .case-aside>p { font-size:16px; } .case-stats { display:block; } .case-stats>div { display:grid; grid-template-columns:92px 1fr; } .process-step { min-height:0; grid-template-columns:80px 1fr 15px; padding:20px 0; gap:8px 12px; } .process-step h3 { font-size:30px; } .process-step p { grid-column:2/3; font-size:15px; } .process-cross { grid-column:3; grid-row:1; } .contact-panel { grid-template-columns:1fr; } .contact-intro,.contact-desk { padding:28px; } .contact-intro h3 { margin:55px 0 20px; } .contact-desk { min-height:275px; } .email-address { margin:55px 0 25px; font-size:clamp(15px,4vw,24px); } .footer-inner { min-height:0; padding-block:25px; flex-wrap:wrap; gap:15px; } .footer-inner>span { order:3; width:100%; color:#AABDC6; } }
+  @media (max-width:370px) { .brand-name { font-size:18px; } .board-head,.board-row { grid-template-columns:35px minmax(0,1fr) 38px; } .yard-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } .footer-inner>div span:last-child { display:none; } }
+  @media (prefers-reduced-motion:reduce) { :root { scroll-behavior:auto; } .board-boot,.board-flip,.service-card:hover::after { animation:none; } .site-shell * { transition:none!important; } }
+</style>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ---------- icons (generic line icons, not from any external library) ---------- */
+function IconArrowUpRight({ size = 20 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>;
+}
+function IconMoon({ size = 18 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12.5A9 9 0 1 1 11.5 3a7 7 0 0 0 9.5 9.5Z" /></svg>;
+}
+function IconSun({ size = 18 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>;
+}
+function IconCopy({ size = 17 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>;
+}
+function IconCheck({ size = 17 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>;
+}
+
+/* ---------- SectionHeading ---------- */
+function SectionHeading({ code, eyebrow, title, description }) {
+  return <div className="section-heading">
+    <div className="section-code"><span className="line-badge">{code}</span><span>{eyebrow}</span></div>
+    <div><h2>{title}</h2>{description && <p>{description}</p>}</div>
+  </div>;
+}
+
+/* ---------- Header ---------- */
+function Header({ theme, onToggle }) {
+  return <header className="site-header">
+    <div className="site-header-inner wrap">
+      <a className="brand" href="#inizio" aria-label="DepoTrack Solutions, torna all'inizio"><span className="brand-mark">DT</span><span className="brand-name">DepoTrack <span>Solutions</span></span></a>
+      <nav className="header-nav" aria-label="Navigazione principale">
+        <a href="#servizi">Servizi</a><a href="#metodo">Come lavoro</a><a href="#contatti">Contatti <IconArrowUpRight size={14} /></a>
+      </nav>
+      <button className="theme-toggle" type="button" onClick={onToggle} aria-label={theme === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'} title={theme === 'light' ? 'Tema scuro' : 'Tema chiaro'}>{theme === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}</button>
+    </div>
+  </header>;
+}
+
+/* ---------- DepartureBoard ---------- */
+const boardServices = [
+  ['01', 'SVILUPPO SU MISURA', 'IN SERVIZIO'],
+  ['02', 'AUDIT SCHEDULING', 'IN SERVIZIO'],
+  ['03', 'MANUTENZIONE & SUPPORTO', 'IN SERVIZIO'],
+  ['04', 'INTEGRAZIONE DATI', 'IN SERVIZIO'],
+];
+const boardExtras = [['05', 'CONTROLLO SCADENZE', 'OPERATIVO'], ['05', 'REPORT DI FLOTTA', 'OPERATIVO']];
+
+function DepartureBoard() {
+  const [extra, setExtra] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setExtra(i => (i + 1) % 2), 5000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return <div className="departure-board" aria-label="Servizi disponibili">
+    <div className="board-top"><span><i className="board-live" /> DEPO / SERVIZI ATTIVI</span><span>MONITOR 01 <span className="board-plus">+</span></span></div>
+    <div className="board-head"><span>LINEA</span><span>SERVIZIO</span><span>STATO</span></div>
+    <div className="board-rows">
+      {boardServices.map(([line, service, status], index) => <div className="board-row board-boot" style={{ '--row': index }} key={line}><span>{line}</span><span>{service}</span><span className="board-status"><b className="status-dot" />{status}</span></div>)}
+      <div className="board-row board-extra board-boot" style={{ '--row': 4 }}><span>05</span><span key={extra} className="board-flip">{boardExtras[extra][1]}</span><span className="board-status"><b className="status-dot" />OPERATIVO</span></div>
+    </div>
+    <div className="board-bottom"><span>● SISTEMA OPERATIVO</span><span>AGGIORNAMENTO CONTINUO</span></div>
+  </div>;
+}
+
+/* ---------- Services ---------- */
+const serviceItems = [
+  { number: '01', title: 'Gestionali su misura', text: 'Software per mezzi, turni, manutenzioni e scadenze, costruito sul modo in cui lavorate davvero. Non il contrario.', tag: 'OPERATIVITÀ' },
+  { number: '02', title: 'Audit organizzativo', text: "Un’ora sul campo per capire dove schedulazione e tracciamento fanno perdere tempo, prima di scrivere codice.", tag: 'ANALISI' },
+  { number: '03', title: 'Manutenzione e crescita', text: 'Il gestionale cresce con l’azienda: nuove viste, nuovi ruoli e nuove integrazioni quando servono.', tag: 'CONTINUITÀ' },
+];
+function Services() {
+  return <section id="servizi" className="section services-section" data-line="121">
+    <div className="wrap"><SectionHeading code="121" eyebrow="02 / SERVIZI" title="STRUMENTI FATTI PER IL VOSTRO LAVORO." description="Niente moduli inutili. Solo quello che serve a far funzionare il deposito, ogni giorno." />
+      <div className="service-grid">{serviceItems.map(item => <article className="service-card" key={item.number}>
+        <div className="service-card-top"><span className="service-number">{item.number}</span><IconArrowUpRight size={19} /></div>
+        <div><h3>{item.title}</h3><p>{item.text}</p></div><span className="service-tag">/ {item.tag}</span>
+      </article>)}</div>
+    </div>
+  </section>;
+}
+
+/* ---------- Yard ---------- */
+const yardSlots = ['occupied','occupied','empty','occupied','maintenance','occupied','empty','occupied','occupied','empty','maintenance','occupied','occupied','occupied','empty','occupied','maintenance','empty','occupied','occupied','occupied','empty','occupied','maintenance'];
+const initialVehicleCount = yardSlots.filter(s => s !== 'empty').length;
+const yardStats = [['150+', 'mezzi in flotta'], ['24', 'stalli a piazzale'], ['0', 'scadenze perse']];
+
+function Yard() {
+  const vehicleCounter = React.useRef(7010 + initialVehicleCount);
+  const [slots, setSlots] = useState(() => {
+    let counter = 7010;
+    return yardSlots.map((state, i) => ({
+      id: i,
+      state,
+      tick: 0,
+      vehicle: state !== 'empty' ? counter++ : null,
+    }));
+  });
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSlots(prev => {
+        const idx = Math.floor(Math.random() * prev.length);
+        const s = prev[idx];
+        let nextState, nextVehicle;
+        if (s.state === 'empty') {
+          nextState = 'occupied';
+          nextVehicle = vehicleCounter.current++;
+        } else if (s.state === 'maintenance') {
+          nextState = 'occupied';
+          nextVehicle = s.vehicle;
+        } else if (Math.random() < 0.18) {
+          nextState = 'maintenance';
+          nextVehicle = s.vehicle;
+        } else {
+          nextState = 'empty';
+          nextVehicle = null;
+        }
+        const copy = prev.slice();
+        copy[idx] = { id: s.id, state: nextState, tick: s.tick + 1, vehicle: nextVehicle };
+        return copy;
+      });
+    }, 1750);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return <section id="caso" className="section case-section" data-line="903"><div className="wrap">
+    <SectionHeading code="903" eyebrow="03 / DAL CAMPO" title="NON È UNA DEMO. È LAVORO QUOTIDIANO." />
+    <div className="case-layout"><div className="yard-dashboard" aria-label="Schema illustrativo di un piazzale con stalli occupati, disponibili e fermi, aggiornato in tempo reale">
+      <div className="yard-toolbar"><span><span className="green-pulse" /> DEPOSITO / VISTA PIAZZALE</span><span>MAPPA STALLI · 01</span></div>
+      <div className="yard-content"><div className="yard-lane"><span>CORSIA A</span><span>↗ ACCESSO MEZZI</span></div><div className="yard-grid">{slots.map(slot => <div key={`${slot.id}-${slot.tick}`} className={`yard-slot ${slot.state} board-flip`}><span>{String(slot.id + 1).padStart(2, '0')}</span><span className="slot-symbol">{slot.vehicle ?? '—'}</span></div>)}</div><div className="yard-lane"><span>CORSIA B</span><span>USCITA MEZZI ↗</span></div></div>
+      <div className="yard-legend"><span><i className="legend-square blue" /> OCCUPATO</span><span><i className="legend-square amber" /> FERMO / OFFICINA</span><span><i className="legend-square outline" /> DISPONIBILE</span></div>
+    </div><div className="case-aside"><div className="case-aside-label">/ CASO REALE — GESTIONE FLOTTA</div><p>Sviluppato e usato quotidianamente in un deposito con oltre 150 mezzi in flotta: stalli, revisioni, fermi e turni assegnati per ruolo, dal piazzale all’officina.</p><div className="case-stats">{yardStats.map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</div></div></div>
+  </div></section>;
+}
+
+/* ---------- Process ---------- */
+const processSteps = [
+  ['01', 'Audit gratuito', 'Un’ora per vedere come lavorate oggi, dove si perde tempo e cosa vale davvero la pena cambiare.'],
+  ['02', 'Proposta chiusa', 'Definiamo funzioni, tempi e costi prima di partire. Sapete cosa viene realizzato e perché.'],
+  ['03', 'Sviluppo a step', 'Si parte dalle attività più urgenti. Ogni passaggio si verifica con chi userà lo strumento.'],
+  ['04', 'Consegna e formazione', 'Il gestionale entra nel lavoro quotidiano, con formazione per i ruoli coinvolti e supporto dopo il rilascio.'],
+];
+function Process() {
+  return <section id="metodo" className="section process-section" data-line="66"><div className="wrap">
+    <SectionHeading code="66" eyebrow="04 / COME LAVORO" title="PRIMA IL DEPOSITO. POI IL CODICE." description="Un percorso semplice, dal problema operativo allo strumento che lo risolve." />
+    <div className="process-list">{processSteps.map(([number, title, text]) => <div className="process-step" key={number}><span className="process-index">FASE / {number}</span><h3>{title}</h3><p>{text}</p><span className="process-cross" aria-hidden="true">+</span></div>)}</div>
+  </div></section>;
+}
+
+/* ---------- Contact ---------- */
+const contactEmail = 'depotrack-solutions@proton.me';
+function Contact() {
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState(false);
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText(contactEmail);
+      setCopied(true); setError(false);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch { setError(true); }
+  }
+  return <section id="contatti" className="section contact-section" data-line="00"><div className="wrap">
+    <SectionHeading code="00" eyebrow="05 / CONTATTI" title="PARLIAMO DELLA VOSTRA FLOTTA." />
+    <div className="contact-panel"><div className="contact-intro"><div className="contact-signal"><span className="green-pulse" /> LINEA DIRETTA / DISPONIBILE</div><h3>Un’ora per capire se posso esservi utile.</h3><p>Raccontatemi come gestite mezzi, turni e scadenze oggi. L’audit è gratuito e senza impegno: se non c’è un problema che un software su misura può risolvere, ve lo dico.</p></div>
+      <div className="contact-desk"><span className="desk-label">INDIRIZZO EMAIL / CONTATTO DIRETTO</span><a className="email-address" href={`mailto:${contactEmail}?subject=Audit%20gratuito%20DepoTrack`}>{contactEmail} <IconArrowUpRight size={20} /></a><button className="copy-button" type="button" onClick={copyEmail}>{copied ? <IconCheck size={17} /> : <IconCopy size={17} />}{copied ? 'Email copiata' : 'Copia email'}</button>{error && <p className="copy-error" role="status">Copia non disponibile. Seleziona l’indirizzo email qui sopra.</p>}<span className="desk-foot">/ UN’ORA, SENZA IMPEGNO</span></div>
+    </div>
+  </div></section>;
+}
+
+/* ---------- Home ---------- */
+function Home() {
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem('depotrack-theme') === 'dark' ? 'dark' : 'light'; }
+    catch { return 'light'; }
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('depotrack-theme', theme); } catch {}
+  }, [theme]);
+
+  return <div className="site-shell" id="inizio">
+    <Header theme={theme} onToggle={() => setTheme(t => t === 'light' ? 'dark' : 'light')} />
+    <main>
+      <section className="hero" data-line="01"><div className="wrap">
+        <div className="hero-topline"><span><i className="green-pulse" /> SISTEMI OPERATIVI PER LA LOGISTICA</span><span>DEPO / 001 — ITALIA</span></div>
+        <div className="hero-copy">
+          <div className="hero-kicker"><span className="line-badge">01</span> SOLUZIONI DAL CAMPO</div>
+          <h1>SOFTWARE GESTIONALE<br /><em>SU MISURA</em> PER AZIENDE<br className="desktop-break" /> DI TRASPORTO E LOGISTICA<span className="hero-period">.</span></h1>
+          <div className="hero-bottom">
+            <p>Progetto e sviluppo strumenti per la gestione di mezzi, turni, manutenzioni e scadenze, basati su anni di esperienza diretta nella gestione operativa di un deposito.</p>
+            <div className="hero-action"><a className="primary-cta" href="#contatti">Prenota un audit gratuito <IconArrowUpRight size={20} /></a><span>UN’ORA, SENZA IMPEGNO</span></div>
+          </div>
+        </div>
+        <DepartureBoard />
+      </div></section>
+
+      <section className="positioning" data-line="66"><div className="wrap positioning-inner">
+        <span className="positioning-label"><span className="line-badge">66</span> / IL PUNTO DI PARTENZA</span>
+        <p>Quando la flotta cresce, <strong>Excel non basta più.</strong> E un gestionale generico non conosce il vostro piazzale.</p>
+        <span className="positioning-end">DAL FOGLIO DI CALCOLO<br />AL CONTROLLO OPERATIVO ↗</span>
+      </div></section>
+
+      <Services />
+      <Yard />
+      <Process />
+      <Contact />
+    </main>
+    <footer className="site-footer"><div className="wrap footer-inner">
+      <div><span className="footer-terminus" /> <strong>DepoTrack Solutions</strong><span> / SOFTWARE DAL CAMPO</span></div>
+      <span>© {new Date().getFullYear()} DEPOTRACK SOLUTIONS · FINE LINEA / 00</span>
+      <a href="#inizio">TORNA SU ↑</a>
+    </div></footer>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Home />);
+</script>
