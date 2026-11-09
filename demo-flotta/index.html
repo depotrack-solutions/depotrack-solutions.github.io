@@ -1013,6 +1013,14 @@ body.dense .st .rvi{top:6px!important;right:48px!important;font-size:12px}
   .qrinfo{grid-template-columns:1fr}.qrimg{max-width:170px;margin:0 auto}
   body{padding-bottom:70px}
 }
+.simcap{position:fixed;z-index:66;display:flex;gap:12px;align-items:flex-start;padding:14px 16px 16px;border-radius:18px;background:color-mix(in srgb,var(--bg) 90%,#fff 5%);border:1px solid color-mix(in srgb,var(--acc) 50%,transparent);box-shadow:0 20px 50px rgba(0,0,0,.5);color:var(--txt);opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;pointer-events:none;overflow:hidden}
+.simcap.on{opacity:1;transform:none}
+.simcap .sci{font-size:24px;line-height:1}
+.simcap b{display:block;font-size:15px;margin-bottom:3px}
+.simcap span{display:block;font-size:13.5px;line-height:1.45;color:color-mix(in srgb,var(--txt) 85%,transparent)}
+.simcap .scbar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--acc);transform-origin:left;animation:scb 10s linear forwards}
+@keyframes scb{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.st.simhi{outline:3px solid var(--acc);outline-offset:4px;border-radius:16px}
 </style>
 </head>
 <body class="v3d s-solid">
@@ -3919,29 +3927,54 @@ function simStato(v,newS,motivo,txt){
     else if(isPura(old)&&!isPura(newS)){var ok=Object.keys(SF).filter(function(k){return SF[k]&&SF[k].vid===v.id&&SF[k].endTs==null})[0];if(ok){var t=Date.now();DB.ref('depotrack_stat_fermi/'+ok).update({endTs:t,durationMs:t-SF[ok].startTs})}}
     addLog(isPura(newS)?'fermo':'stato','Vet. '+v.n+' → '+stOf(newS)[0]+(motivo?' — '+motivo:''),{vid:v.id,stato:newS});
   });
-  simToast(txt);if(v.stall)flash(v.stall);
+  simToast(txt);
 }
-function simToast(t){SIMN++;toast('⚡ '+t)}
+function simToast(t){SIMN++}
 function freeStalls(){return stallIds().filter(function(s){return !atStall(s)})}
+/* ogni evento: scorro fino allo stallo, aspetto che si veda, eseguo il cambio e lo spiego in un fumetto accanto */
+var SIM_GAP=10000,SIM_T=null,simCap=null;
+function simCaption(sid,ic,tit,txt){
+  if(!simCap){simCap=document.createElement('div');simCap.className='simcap';document.body.appendChild(simCap)}
+  simCap.innerHTML='<div class="sci">'+ic+'</div><div><b>'+esc(tit)+'</b><span>'+esc(txt)+'</span></div><i class="scbar"></i>';
+  simCap.classList.remove('on');void simCap.offsetWidth;simCap.classList.add('on');
+  var el=ELS[sid];$$('.st.simhi').forEach(function(e){e.classList.remove('simhi')});if(el)el.classList.add('simhi');
+  function place(){if(!simCap)return;var cw=Math.min(360,innerWidth-24),r=el?el.getBoundingClientRect():null;
+    if(!r||innerWidth<=560){simCap.style.cssText='left:12px;right:12px;bottom:132px;width:auto';simCap.classList.add('dock');return}
+    simCap.classList.remove('dock');var top=r.bottom+18+130<innerHeight?r.bottom+18:Math.max(80,r.top-18-simCap.offsetHeight);
+    simCap.style.cssText='left:'+Math.min(Math.max(12,r.left+r.width/2-cw/2),innerWidth-cw-12)+'px;top:'+top+'px;width:'+cw+'px'}
+  place();setTimeout(place,60);
+}
+function simGoTo(sid,cb){
+  if(S.view!=='piazzale')go('piazzale');
+  var el=ELS[sid];if(!el){cb();return}
+  var r=el.getBoundingClientRect(),vis=r.top>90&&r.bottom<innerHeight-120;
+  if(!vis)el.scrollIntoView({block:'center',behavior:'smooth'});
+  setTimeout(cb,vis?500:1300);
+}
 function simStep(){
-  var DP=dispId(),SV=ORDER.filter(function(k){return lname(k).indexOf('servizio')>-1})[0];
+  var DP=dispId(),SV=ORDER.filter(function(k){return lname(k).indexOf('servizio')>-1})[0],FE=ORDER.filter(isPura)[0]||'ferma';
   var ev=[];
   var rientro=V.filter(function(v){return SV&&v.s===SV&&!v.stall}),fs=freeStalls();
-  if(rientro.length&&fs.length)ev.push(function(){var v=rnd(rientro),s=rnd(fs);DB.ref('depotrack').update((function(){var u={};u['assign/'+s]=v.id;return u})());
-    addLog('assign','Vet. '+v.n+' rientra → Stallo '+s,{vid:v.id,sid:s});simStato(v,DP,null,'Il '+v.n+' rientra dal servizio e parcheggia in '+s);setTimeout(function(){flash(s)},300)});
+  if(rientro.length&&fs.length)ev.push([3,function(){var v=rnd(rientro),s=rnd(fs);simGoTo(s,function(){
+    var u={};u['assign/'+s]=v.id;DB.ref('depotrack').update(u);addLog('assign','Vet. '+v.n+' rientra → Stallo '+s,{vid:v.id,sid:s});simStato(v,DP,null);setTimeout(function(){flash(s)},250);
+    simCaption(s,'↩','Rientro dal servizio','Il '+v.n+' torna in deposito e il capo piazzale lo parcheggia nello stallo '+s+'. Diventa verde: è di nuovo disponibile per uscire.')})}]);
   var usc=V.filter(function(v){return v.s===DP&&v.stall});
-  if(usc.length&&SV)ev.push(function(){var v=rnd(usc),s=v.stall;DB.ref('depotrack/assign/'+s).remove();addLog('libera','Vet. '+v.n+' esce da Stallo '+s,{vid:v.id,sid:s});simStato(v,SV,null,'Il '+v.n+' esce in servizio dallo stallo '+s);flash(s)});
-  if(usc.length)ev.push(function(){var v=rnd(usc),m=rnd(SIM_MOT);simStato(v,ORDER.filter(isPura)[0]||'ferma',m,'Guasto sul '+v.n+': '+m.toLowerCase()+'. Fermo aperto per l\'officina')});
-  var fer=V.filter(function(v){return isPura(v.s)||isTemp(v.s)});
-  if(fer.length)ev.push(function(){var v=rnd(fer);simStato(v,DP,null,'L\'officina ha riparato il '+v.n+': torna disponibile')});
+  if(usc.length&&SV)ev.push([3,function(){var v=rnd(usc),s=v.stall;simGoTo(s,function(){
+    simCaption(s,'🚌','Uscita in servizio','Il '+v.n+' parte per il suo turno: lo stallo '+s+' si libera e il mezzo passa a "In servizio". Al rientro tornerà sul piazzale.');
+    setTimeout(function(){DB.ref('depotrack/assign/'+s).remove();addLog('libera','Vet. '+v.n+' esce da Stallo '+s,{vid:v.id,sid:s});simStato(v,SV,null);flash(s)},900)})}]);
+  if(usc.length)ev.push([1,function(){var v=rnd(usc),s=v.stall,m=rnd(SIM_MOT);simGoTo(s,function(){
+    simStato(v,FE,m);simCaption(s,'⚠','Guasto segnalato','Il '+v.n+' si ferma: '+m.toLowerCase()+'. Lo stallo diventa rosso, il motivo resta nella scheda e parte il conteggio del fermo nelle statistiche.')})}]);
+  var fer=V.filter(function(v){return (isPura(v.s)||isTemp(v.s))&&v.stall});
+  if(fer.length)ev.push([2,function(){var v=rnd(fer),s=v.stall;simGoTo(s,function(){
+    simStato(v,DP,null);simCaption(s,'🔧','Riparato dall\'officina','L\'officina chiude il lavoro sul '+v.n+': torna verde e disponibile. La durata del fermo finisce nelle statistiche per mezzo.')})}]);
   if(!ev.length)return;
-  /* più rientri e uscite che guasti, come una giornata vera */
-  var w=[];ev.forEach(function(f,i){var n=(i===2)?1:3;for(var k=0;k<n;k++)w.push(f)});rnd(w)();
+  var w=[];ev.forEach(function(e){for(var k=0;k<e[0];k++)w.push(e[1])});rnd(w)();
 }
+function simLoop(){simStep();SIM_T=setTimeout(simLoop,SIM_GAP)}
 function simToggle(on){
   var b=$('#bSim');on=(on===undefined)?!SIM:on;
-  if(on&&!SIM){if(!ME.role){toast('Un attimo, preparo la demo…');return}SIMN=0;simStep();SIM=setInterval(simStep,4500);b.classList.add('on');b.querySelector('.ft').textContent='Simulazione in corso · ferma';if(S.view!=='piazzale')go('piazzale')}
-  else if(!on&&SIM){clearInterval(SIM);SIM=null;b.classList.remove('on');b.querySelector('.ft').textContent='Simula una giornata';toast(SIMN+' eventi simulati · li trovi in Attività e nelle Statistiche fermi')}
+  if(on&&!SIM){if(!ME.role){toast('Un attimo, preparo la demo…');return}SIMN=0;SIM=1;b.classList.add('on');b.querySelector('.ft').textContent='Simulazione in corso · ferma';closeInsp&&closeInsp();if(S.view!=='piazzale')go('piazzale');simLoop()}
+  else if(!on&&SIM){clearTimeout(SIM_T);SIM=null;b.classList.remove('on');b.querySelector('.ft').textContent='Simula una giornata';if(simCap){simCap.remove();simCap=null}$$('.st.simhi').forEach(function(e){e.classList.remove('simhi')});toast(SIMN+' eventi simulati · li trovi in Attività e nelle Statistiche fermi')}
 }
 document.addEventListener('visibilitychange',function(){if(document.hidden&&SIM)simToggle(false)});
 /* ---------- giro guidato ---------- */
@@ -3951,7 +3984,7 @@ var TOUR=[
   {s:'.st:not(.free)',t:'Il piazzale',x:'Ogni riquadro è uno stallo. Il colore dice lo stato del mezzo, il pallino in alto la tipologia. Tocca un mezzo per aprire la sua scheda, oppure trascinalo su un altro stallo.',go:'piazzale'},
   {s:'.tab[data-v="magazzino"]',t:'Il magazzino ricambi',x:'Giacenze per sede, scorte minime, carichi da DDT e ricambi scaricati sui mezzi, con il costo per ogni vettura.'},
   {s:'#bMenu',t:'Report e configurazione',x:'Fermi, statistiche, disponibilità, revisioni, esportazioni in Excel e PDF. Da qui configuri anche corsie, stati e tipologie.'},
-  {s:'#bSim',t:'Guardala lavorare',x:'Premi "Simula una giornata": i mezzi entrano, escono, si guastano e tornano disponibili da soli, come in un deposito vero.'},
+  {s:'#bSim',t:'Guardala lavorare',x:'Premi "Simula una giornata": ogni 10 secondi succede qualcosa, la pagina va da sola sullo stallo interessato e ti spiega cosa sta accadendo.'},
   {s:'#bWa',t:'Ti piace?',x:'Scrivimi su WhatsApp: preparo la demo con i tuoi mezzi, le tue corsie e il tuo logo.',end:true}
 ];
 var TI=0,tourEl=null;
