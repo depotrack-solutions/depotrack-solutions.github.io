@@ -2023,7 +2023,7 @@ document.addEventListener('keydown',function(e){
 /* ---------- aspetto ---------- */
 var look=$('#look');
 function closeLook(){look.classList.remove('open')}
-$('#bLook').onclick=function(e){e.stopPropagation();look.classList.toggle('open')};
+$('#bLook').onclick=function(e){e.stopPropagation();hmenu.classList.remove('open');look.classList.toggle('open')};
 look.onclick=function(e){e.stopPropagation()};
 document.addEventListener('click',function(e){if(look.classList.contains('open')&&!e.target.closest('#bLook'))closeLook()});
 $('#pals').innerHTML=PALS.map(function(p,i){return '<button class="pal" data-i="'+i+'"><span class="psw"><i style="background:'+p[1]+'"></i><i style="background:'+p[2]+'"></i><i style="background:'+p[3]+'"></i><i style="background:'+p[4]+'"></i></span>'+p[0]+'</button>'}).join('');
