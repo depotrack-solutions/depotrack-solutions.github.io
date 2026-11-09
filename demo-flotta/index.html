@@ -4054,7 +4054,8 @@ buildFab();
 
 /* ---------- contatto: modulo che arriva per email (FormSubmit, gratuito) e, se attivato, su WhatsApp (CallMeBot) ---------- */
 var MAIL_TO='depotrack-solutions@proton.me';
-var CMB_KEY='2919507';   /* chiave CallMeBot: vuota = solo email */
+var CMB_KEY='2919507';
+var NTFY_TOPIC='depotrack-42a70829f1';   /* notifica sul telefono di Mauro con l'app ntfy */   /* chiave CallMeBot: vuota = solo email */
 function openContatto(){
   var tel=matchMedia('(pointer:coarse)').matches;
   var f=function(id,l,t,ph){return '<div><div class="lab">'+l+'</div><input class="field" id="ct-'+id+'" type="'+t+'" placeholder="'+ph+'" autocomplete="'+({n:'name',a:'organization',t:'tel',e:'email'}[id]||'off')+'"></div>'};
@@ -4085,6 +4086,9 @@ function inviaContatto(M){
     var cu='https://api.callmebot.com/whatsapp.php?phone='+WA_NUM+'&text='+encodeURIComponent(t).replace(/%20/g,'+')+'&apikey='+encodeURIComponent(CMB_KEY);
     /* richiesta semplice come un'immagine: il browser non la blocca e non serve risposta */
     try{var im=new Image();im.referrerPolicy='no-referrer';im.src=cu}catch(e){}}
+  if(NTFY_TOPIC){var nt=(d.azienda?d.azienda+'\n':'')+'Nome: '+d.nome+'\nTelefono: '+(d.telefono||'-')+'\nEmail: '+(d.email||'-')+(d.messaggio?'\nMessaggio: '+d.messaggio:'');
+    var nh={'Title':'Nuova richiesta demo DepoTrack','Priority':'high','Tags':'bus,bell'};if(d.telefono)nh['Actions']='view, Chiama, tel:'+d.telefono.replace(/[^0-9+]/g,'');
+    try{fetch('https://ntfy.sh/'+NTFY_TOPIC,{method:'POST',body:nt,headers:nh}).catch(function(){})}catch(e){}}
   fetch('https://formsubmit.co/ajax/'+MAIL_TO,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body)})
     .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(r.ok&&String(j.success)!=='false')ok();else ko()})}).catch(ko);
 }
