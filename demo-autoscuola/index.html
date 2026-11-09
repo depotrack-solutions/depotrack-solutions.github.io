@@ -1,0 +1,1549 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DepoTrack per Autoscuola — Demo</title>
+<meta name="theme-color" content="#06070A">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Stile glass / neon — stesso sistema del gestionale magazzino Pagliani */
+:root{--acc:#3D5AFE;--acc2:#FF2FA3;--acc3:#FF8A1E;--acc4:#AEB6C2;--onAcc:#fff;--g:#FF2FA3;--r:14px;--d:1;--side-w:248px}
+html[data-theme=dark]{--bg:#06070A;--bg2:#0d1020;--surf:rgba(255,255,255,.045);--surf2:rgba(255,255,255,.075);--surf3:rgba(255,255,255,.12);--bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.15);--txt:#F5F7FF;--mut:#9aa3b4;--solid:#12151f;
+ --sh:0 18px 50px rgba(0,0,0,.45);--shi:inset 0 1px 0 rgba(255,255,255,.06);--ins:inset 0 2px 6px rgba(0,0,0,.45);
+ --ok:#2ee59d;--ko:#ff5470;--warn:#ffb547;color-scheme:dark}
+html[data-theme=light]{--bg:#eef0f6;--bg2:#e2e6ef;--surf:rgba(255,255,255,.6);--surf2:rgba(255,255,255,.85);--surf3:#fff;--bd:rgba(20,28,45,.08);--bd2:rgba(20,28,45,.15);--txt:#151a26;--mut:#5b6476;--solid:#f8f9fc;
+ --sh:10px 10px 26px rgba(150,160,185,.32),-8px -8px 22px rgba(255,255,255,.85);--shi:inset 0 1px 0 rgba(255,255,255,.9);--ins:inset 3px 3px 7px rgba(150,160,185,.32),inset -3px -3px 7px rgba(255,255,255,.9);
+ --ok:#0f9f62;--ko:#e0344f;--warn:#b97400;color-scheme:light}
+html{--glow:0 0 22px color-mix(in srgb,var(--acc) 45%,transparent);--glow2:0 0 16px color-mix(in srgb,var(--acc2) 45%,transparent);--grad:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 40%,var(--g,var(--acc2))));background:var(--bg)}
+html.noglow{--glow:0 0 0 transparent;--glow2:0 0 0 transparent}
+html.noanim *{animation:none!important;transition:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{min-height:100vh;background:radial-gradient(900px 520px at 0% -10%,color-mix(in srgb,var(--acc) 20%,transparent),transparent 65%),radial-gradient(800px 500px at 100% 0%,color-mix(in srgb,var(--acc2) 14%,transparent),transparent 60%),radial-gradient(700px 500px at 50% 115%,color-mix(in srgb,var(--acc3) 11%,transparent),transparent 60%),linear-gradient(180deg,var(--bg),var(--bg2));background-attachment:fixed;color:var(--txt);font:14px/1.45 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+::selection{background:color-mix(in srgb,var(--acc) 40%,transparent)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12.5px}
+.glass,.card,.tile,.cat-card,.sidebar,.topbar{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh),var(--shi);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3)}
+/* struttura */
+.app{display:flex;min-height:100vh}
+.sidebar{position:fixed;top:14px;bottom:14px;left:14px;width:var(--side-w);display:flex;flex-direction:column;padding:16px 12px;z-index:20;border-radius:calc(var(--r)*1.3)}
+.sb-logo{display:flex;gap:11px;align-items:center;padding:4px 8px 20px}
+.logo{width:40px;height:40px;border-radius:calc(var(--r)*.8);background:var(--grad);display:grid;place-items:center;color:var(--onAcc);box-shadow:var(--glow);flex:none;overflow:hidden;font:700 19px 'Space Grotesk',Inter}
+.brand-t b{font:700 16px 'Space Grotesk',Inter;display:block;letter-spacing:.2px;line-height:1.15}
+.brand-t small{color:var(--mut);font-size:11px;letter-spacing:.6px}
+.sb-nav{display:flex;flex-direction:column;gap:4px}
+.navitem{display:flex;align-items:center;gap:12px;padding:calc(10px*var(--d)) 12px;border-radius:calc(var(--r)*.8);cursor:pointer;color:var(--mut);border:1px solid transparent;font:500 14px Inter;transition:.2s}
+.navitem svg{width:19px;height:19px;flex:none}
+.navitem:hover{background:var(--surf2);color:var(--txt)}
+.navitem.active{color:var(--txt);background:color-mix(in srgb,var(--acc) 16%,transparent);border-color:color-mix(in srgb,var(--acc) 45%,transparent);box-shadow:var(--glow),inset 0 0 18px color-mix(in srgb,var(--acc) 14%,transparent)}
+.navitem.active svg{color:var(--acc)}
+.navitem .nb{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--acc2);color:#fff;font:700 11px Inter;display:grid;place-items:center;box-shadow:var(--glow2)}
+.sb-foot{margin-top:auto;padding:12px 10px 4px;font:600 10px Inter;letter-spacing:1.2px;color:var(--mut);text-transform:uppercase}
+.sb-foot span{color:var(--acc)}
+.main{margin-left:calc(var(--side-w) + 28px);flex:1;min-width:0;padding:14px 14px 0 0;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px 12px 20px;position:sticky;top:14px;z-index:10;margin-bottom:18px;border-radius:calc(var(--r)*1.2)}
+.ptitle{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;font:700 21px 'Space Grotesk',Inter;letter-spacing:-.3px}
+#pageSub{color:var(--mut);font-size:12px;margin-top:1px}
+.demo-tag{font:700 10.5px Inter;letter-spacing:1.2px;text-transform:uppercase;padding:5px 10px;border-radius:999px;color:var(--acc2);border:1px solid color-mix(in srgb,var(--acc2) 45%,transparent);background:color-mix(in srgb,var(--acc2) 12%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--acc2) 25%,transparent);white-space:nowrap}
+.content{flex-grow:1;padding:0 2px 60px;max-width:1340px;display:flex;flex-direction:column}
+.panel{display:none}
+.panel.active{display:flex;flex-direction:column;gap:18px;flex-grow:1}
+.panel.active>*{animation:rise .45s cubic-bezier(.2,.7,.2,1) both}
+.panel.active>*:nth-child(2){animation-delay:.05s}.panel.active>*:nth-child(3){animation-delay:.1s}.panel.active>*:nth-child(4){animation-delay:.15s}.panel.active>*:nth-child(5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(10px)}}
+/* KPI */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.tile{padding:16px 18px;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+.tile::after{content:'';position:absolute;inset:auto -30px -40px auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c,var(--acc)) 24%,transparent),transparent 70%);pointer-events:none}
+.tile:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--c,var(--acc)) 50%,transparent);box-shadow:var(--sh),0 0 26px color-mix(in srgb,var(--c,var(--acc)) 30%,transparent)}
+.tile .lbl{font:600 10.5px Inter;letter-spacing:1.1px;color:var(--mut);text-transform:uppercase}
+.tile .num{font:700 30px/1.1 'Space Grotesk',Inter;margin-top:6px;letter-spacing:-.5px;color:var(--c,var(--txt));text-shadow:0 0 18px color-mix(in srgb,var(--c,var(--acc)) 35%,transparent)}
+html.noglow .tile .num{text-shadow:none}
+.alert{padding:12px 18px;font-size:13px;border-radius:var(--r);border:1px solid color-mix(in srgb,var(--acc2) 40%,transparent);background:color-mix(in srgb,var(--acc2) 10%,var(--surf));box-shadow:var(--glow2);display:none}
+.alert strong{color:var(--txt)}
+/* card e tabelle */
+.card{overflow:hidden;display:flex;flex-direction:column}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--bd);font:600 15px 'Space Grotesk',Inter;position:relative}
+.panel-head::after{content:'';position:absolute;left:18px;width:60px;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:var(--glow)}
+.panel-head small{font:400 12px Inter;color:var(--mut)}
+.hint{padding:9px 18px;font-size:12px;color:var(--mut);background:color-mix(in srgb,var(--acc) 6%,transparent);border-bottom:1px solid var(--bd)}
+.row{display:grid;grid-template-columns:1.2fr 1fr .8fr .8fr;padding:calc(11px*var(--d)) 18px;font-size:13px;align-items:center;border-bottom:1px solid var(--bd);gap:6px 12px;transition:background .15s}
+.row:last-child{border-bottom:none}
+.row.clickable{cursor:pointer}
+.row.clickable:hover,.row.clickable:active{background:color-mix(in srgb,var(--acc) 9%,transparent)}
+.row strong{font-weight:600}
+.row small,.sm{display:block;font-size:11.5px;color:var(--mut)}
+.tag-head{display:grid;grid-template-columns:1.2fr 1fr .8fr .8fr;gap:12px;padding:10px 18px;font:600 10.5px Inter;letter-spacing:.9px;color:var(--mut);text-transform:uppercase;border-bottom:1px solid var(--bd);background:color-mix(in srgb,var(--solid) 60%,transparent)}
+.empty{padding:26px;text-align:center;color:var(--mut);font-size:13px}
+.warn{display:block;font-size:11.5px;color:var(--ko);font-weight:600;margin-top:3px}
+.bar{height:6px;background:var(--surf3);border-radius:3px;margin-top:6px;overflow:hidden;box-shadow:var(--ins)}
+.bar i{display:block;height:100%;border-radius:3px;box-shadow:0 0 8px currentColor}
+.day-head{padding:9px 18px;font:600 10.5px Inter;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc);border-bottom:1px solid var(--bd);background:color-mix(in srgb,var(--acc) 7%,transparent)}
+.sec-title{font:600 11.5px Inter;letter-spacing:1.4px;color:var(--mut);text-transform:uppercase;margin-bottom:-6px;display:flex;align-items:center;gap:9px}
+.sec-title::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc)}
+html.noglow .sec-title::before{box-shadow:none}
+/* pill di stato con led */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font:700 11px Inter;letter-spacing:.3px;white-space:nowrap;border:1px solid color-mix(in srgb,var(--pc) 35%,transparent);color:var(--pc);background:color-mix(in srgb,var(--pc) 13%,transparent)}
+.pill::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;flex:none}
+/* categorie scadenze */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:12px}
+.cat-card{padding:14px 15px;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden}
+.cat-card::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--c);box-shadow:0 0 12px var(--c)}
+.cat-card::after{content:'';position:absolute;right:-40px;top:-50px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c) 22%,transparent),transparent 70%);pointer-events:none}
+.cat-card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--c) 50%,transparent);box-shadow:var(--sh),0 0 24px color-mix(in srgb,var(--c) 28%,transparent)}
+.cat-top{display:flex;gap:9px;align-items:center;font:600 13px Inter;line-height:1.2}
+.cat-ico{width:30px;height:30px;border-radius:calc(var(--r)*.6);display:grid;place-items:center;font-size:15px;flex:none;background:color-mix(in srgb,var(--c) 15%,transparent);border:1px solid color-mix(in srgb,var(--c) 35%,transparent)}
+.cat-num{font:700 30px/1.05 'Space Grotesk',Inter;margin-top:10px;color:var(--c);text-shadow:0 0 16px color-mix(in srgb,var(--c) 40%,transparent)}
+html.noglow .cat-num{text-shadow:none}
+.cat-num span{font:600 10px Inter;letter-spacing:1px;color:var(--mut);text-transform:uppercase;margin-left:6px;text-shadow:none}
+.cat-sub{font-size:11.5px;color:var(--mut);margin-top:3px}
+.dash-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--bd)}
+.chip{padding:7px 13px;border-radius:999px;border:1px solid var(--bd);background:var(--surf2);font:600 12px Inter;color:var(--mut);cursor:pointer;white-space:nowrap;transition:.2s}
+.chip:hover{color:var(--txt);border-color:var(--bd2)}
+.chip b{font:700 10.5px Inter;margin-left:6px;padding:1px 7px;border-radius:8px;background:color-mix(in srgb,var(--ko) 18%,transparent);color:var(--ko)}
+.chip.on{background:var(--grad);color:var(--onAcc);border-color:transparent;box-shadow:var(--glow)}
+.chip.on b{background:rgba(0,0,0,.25);color:#fff}
+.giac{display:flex;flex-wrap:wrap;gap:10px;padding:14px 18px}
+.giac div{border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;background:var(--surf2);font-size:12px;min-width:160px;color:var(--mut);box-shadow:var(--shi)}
+.giac strong{display:block;font:700 24px 'Space Grotesk',Inter;color:var(--txt)}
+/* bottoni */
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:calc(9px*var(--d)) 18px;background:var(--grad);border-radius:999px;color:var(--onAcc);font:600 13.5px Inter;cursor:pointer;border:1px solid transparent;transition:.2s;white-space:nowrap;box-shadow:var(--glow),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 32px color-mix(in srgb,var(--acc) 60%,transparent),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-secondary{display:inline-flex;align-items:center;gap:7px;padding:calc(8px*var(--d)) 16px;border-radius:999px;border:1px solid var(--bd2);background:var(--surf2);font:600 13px Inter;cursor:pointer;color:var(--txt);transition:.2s}
+.btn-secondary:hover{border-color:var(--acc);color:var(--acc);box-shadow:var(--glow)}
+.btn-danger{padding:9px 16px;border-radius:999px;border:1px solid color-mix(in srgb,var(--ko) 45%,transparent);background:color-mix(in srgb,var(--ko) 16%,transparent);color:var(--ko);font:600 13px Inter;cursor:pointer;margin-right:auto;box-shadow:0 0 16px color-mix(in srgb,var(--ko) 22%,transparent)}
+.btn-mini{padding:6px 13px;border-radius:999px;border:1px solid color-mix(in srgb,var(--acc2) 40%,transparent);background:color-mix(in srgb,var(--acc2) 15%,var(--surf2));color:var(--txt);font:600 12px Inter;cursor:pointer;white-space:nowrap}
+.btn-mini:hover{box-shadow:var(--glow2)}
+.btn-mini.done{border-color:var(--bd);background:transparent;color:var(--mut);cursor:default;box-shadow:none}
+.tb-actions{display:flex;align-items:center;gap:8px}
+.ib{height:40px;min-width:40px;padding:0 13px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--surf2);border:1px solid var(--bd);color:var(--txt);cursor:pointer;box-shadow:var(--shi);transition:.2s;font:600 13px Inter}
+.ib:hover{border-color:var(--acc);color:var(--acc);box-shadow:var(--glow)}
+.ib svg{width:18px;height:18px;flex:none}
+.ib .cnt{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--acc2);color:#fff;font:700 11px Inter;display:grid;place-items:center;box-shadow:var(--glow2)}
+/* modali */
+.modal-backdrop::before{content:'';position:fixed;inset:0;z-index:-1;background:color-mix(in srgb,var(--bg) 50%,rgba(0,0,0,.4));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:none}
+.modal-backdrop{display:none;position:fixed;inset:0;align-items:flex-start;justify-content:center;z-index:100;padding:6vh 12px;overflow-y:auto}
+.modal-backdrop.open{display:flex}
+.modal{background:color-mix(in srgb,var(--solid) 94%,transparent);border:1px solid var(--bd2);border-radius:calc(var(--r)*1.3);width:100%;max-width:460px;box-shadow:0 30px 80px rgba(0,0,0,.45),var(--shi);padding:20px 22px;animation:pop .28s cubic-bezier(.2,.7,.2,1);position:relative}
+.modal h3{margin:0 0 18px;font:600 17px 'Space Grotesk',Inter;padding-bottom:12px;position:relative}
+.modal h3::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,var(--acc),var(--acc2),transparent);box-shadow:var(--glow)}
+.field{margin-bottom:14px}
+.field label{display:block;font:600 12px Inter;color:var(--mut);margin-bottom:6px}
+.field input,.field select{width:100%;background:var(--surf2);border:1px solid var(--bd);border-radius:calc(var(--r)*.75);padding:calc(9px*var(--d)) 12px;color:var(--txt);font:16px Inter;box-shadow:var(--ins);outline:0}
+.field input:focus,.field select:focus{border-color:var(--acc);box-shadow:var(--ins),var(--glow)}
+.field select{appearance:none;-webkit-appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa3b4' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center}
+option{background:var(--solid);color:var(--txt)}
+.cs-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surf2);border:1px solid var(--bd);border-radius:calc(var(--r)*.75);padding:calc(9px*var(--d)) 13px;min-height:42px;color:var(--txt);font:16px Inter;box-shadow:var(--ins);cursor:pointer;text-align:left}
+.cs-btn span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cs-btn svg{flex:none;color:var(--mut);transition:transform .2s}
+.cs-btn[aria-expanded=true]{border-color:var(--acc);box-shadow:var(--ins),var(--glow)}
+.cs-btn[aria-expanded=true] svg{transform:rotate(180deg);color:var(--acc)}
+.cs-wrap{position:relative}
+.cs-list{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;display:flex;flex-direction:column;gap:2px;max-height:264px;overflow-y:auto;padding:6px;border:1px solid var(--bd2);border-radius:calc(var(--r)*.75);background:var(--solid);box-shadow:0 18px 44px rgba(0,0,0,.45)}
+.cs-list[hidden]{display:none}
+.cs-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:10px 12px;min-height:40px;border:0;border-radius:calc(var(--r)*.55);background:transparent;color:var(--txt);font:500 14.5px Inter;cursor:pointer;text-align:left}
+.cs-opt:hover{background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.cs-opt.on{background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--txt);font-weight:600}
+.cs-opt.on::after{content:'✓';color:var(--acc);font-weight:700}
+.fhint{display:block;font-size:11.5px;color:var(--mut);margin-top:5px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;flex-wrap:wrap}
+.toast{position:fixed;bottom:24px;right:24px;transform:translateY(150px);background:color-mix(in srgb,var(--solid) 94%,transparent);color:var(--txt);padding:12px 18px;border-radius:calc(var(--r)*.9);border:1px solid var(--bd2);box-shadow:var(--sh),var(--glow);z-index:200;transition:.35s cubic-bezier(.2,.8,.2,1);max-width:min(440px,90vw);backdrop-filter:blur(16px);display:flex;gap:10px;align-items:center;opacity:0;pointer-events:none;font-size:13px}
+.toast::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc);flex:none}
+.toast.show{transform:none;opacity:1}
+/* popup (promemoria, aspetto) */
+.pal-pop{display:none;position:fixed;top:92px;right:28px;width:380px;max-height:calc(100vh - 120px);overflow:auto;background:color-mix(in srgb,var(--solid) 94%,transparent);border:1px solid var(--bd2);border-radius:calc(var(--r)*1.2);box-shadow:0 30px 80px rgba(0,0,0,.45);padding:14px;z-index:15;backdrop-filter:blur(24px);animation:pop .25s cubic-bezier(.2,.7,.2,1)}
+.pal-pop.open{display:block}
+.pal-pop.notif{width:420px}
+.pal-pop h4{margin:2px 4px 12px;font:600 11px Inter;letter-spacing:1.2px;color:var(--mut);text-transform:uppercase}
+.notif-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--bd);font-size:13px}
+.notif-row .grow{flex:1;min-width:0}
+.notif-row small{display:block;color:var(--mut);font-size:11.5px}
+.seg{display:inline-flex;padding:4px;border-radius:999px;background:var(--surf2);border:1px solid var(--bd);box-shadow:var(--ins);gap:2px}
+.seg button{border:0;background:none;color:var(--mut);padding:8px 18px;border-radius:999px;font:600 13px Inter;cursor:pointer;transition:.2s}
+.seg button.on{background:var(--grad);color:var(--onAcc);box-shadow:var(--glow)}
+#modalMsg .seg{display:flex;margin-bottom:14px}#modalMsg .seg button{flex:1}
+.bubble{background:#1f3b2c;color:#e9fbe9;border-radius:14px 14px 14px 3px;padding:11px 13px;font-size:13.5px;line-height:1.45;white-space:pre-wrap;border:1px solid rgba(46,229,157,.25)}
+html[data-theme=light] .bubble{background:#DCF8C6;color:#1B2A17}
+.mailbox{background:var(--surf2);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:1.5}
+.mailbox hr{border:none;border-top:1px solid var(--bd);margin:8px 0}
+.msg-note{font-size:11.5px;color:var(--mut);margin-top:10px}
+.uisec{margin-bottom:20px}.uisec:last-child{margin-bottom:4px}
+.ulbl{font:600 13px Inter;margin-bottom:10px;display:flex;justify-content:space-between}
+.dots{display:flex;gap:10px;flex-wrap:wrap}
+.dot{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;font:600 11px Inter;color:var(--mut);background:none;border:0;padding:0;width:62px}
+.dot i{width:40px;height:40px;border-radius:50%;border:2px solid var(--bd2);box-shadow:0 0 16px var(--gl),inset 0 2px 5px rgba(255,255,255,.35);transition:.25s}
+.dot:hover i{transform:scale(1.08)}
+.dot.on i{transform:scale(1.16);border-color:var(--txt);box-shadow:0 0 24px var(--gl),0 0 0 4px color-mix(in srgb,var(--txt) 12%,transparent)}
+.dot.on{color:var(--txt)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:linear-gradient(90deg,var(--acc) var(--p,50%),var(--surf3) var(--p,50%));outline:0;margin:6px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--acc);box-shadow:var(--glow);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--acc);box-shadow:var(--glow);cursor:pointer}
+.rl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut)}
+.sw{display:inline-flex;align-items:center;gap:11px;cursor:pointer;user-select:none;font-size:13.5px}
+.sw input{position:absolute;opacity:0;pointer-events:none}
+.sw i{width:44px;height:24px;border-radius:999px;background:var(--surf3);border:1px solid var(--bd2);position:relative;transition:.25s;box-shadow:var(--ins);flex:none}
+.sw i::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.35);transition:.25s cubic-bezier(.3,1.4,.6,1)}
+.sw input:checked+i{background:var(--grad);border-color:transparent;box-shadow:var(--glow)}
+.sw input:checked+i::after{left:22px}
+.sw small{color:var(--mut)}
+
+.modal.wide{max-width:640px}
+.sch-head{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.sch-head div,.pk-dati div{background:var(--surf2);border:1px solid var(--bd);border-radius:calc(var(--r)*.8);padding:9px 11px;min-width:0}
+.sch-head b,.pk-dati b{display:block;font:600 14px 'Space Grotesk',Inter;overflow-wrap:anywhere}
+.ck-prog{margin-bottom:12px}.okc{color:var(--ok)}.koc{color:var(--warn)}
+.bar.big{height:9px;margin-top:2px}
+.ck{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--bd);border-radius:calc(var(--r)*.8);margin-bottom:8px;cursor:pointer;background:var(--surf);transition:.2s}
+.ck:hover{border-color:var(--bd2)}
+.ck.on{border-color:color-mix(in srgb,var(--ok) 40%,transparent);background:color-mix(in srgb,var(--ok) 7%,transparent)}
+.ck.bad{border-color:color-mix(in srgb,var(--ko) 45%,transparent);background:color-mix(in srgb,var(--ko) 7%,transparent)}
+.ck .grow{flex:1;min-width:0}.ck b{font-weight:600;font-size:13.5px}.ck small{display:block;color:var(--mut);font-size:11.5px}
+.ck-esame{margin-top:16px;padding:12px 14px;border-radius:var(--r);border:1px dashed var(--bd2)}
+.pk-folder{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r);background:color-mix(in srgb,var(--acc) 10%,transparent);border:1px solid color-mix(in srgb,var(--acc) 35%,transparent);margin-bottom:8px;box-shadow:var(--glow)}
+.pk-folder>span:first-child{font-size:22px}
+.pk-folder .grow,.pk .grow{flex:1;min-width:0}.pk-folder small,.pk small{display:block;color:var(--mut);font-size:11.5px}
+.pk{display:flex;align-items:center;gap:12px;padding:7px 10px 7px 16px;border-left:2px solid var(--bd2);margin-left:14px}
+.pk-ico{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 12px Inter;flex:none;background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent)}
+.pk.ok .pk-ico{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--ok) 35%,transparent)}
+.pk-dati{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pk-steps{margin:0;padding-left:20px;font-size:13px;line-height:1.75}
+.ta{width:100%;background:var(--surf2);border:1px solid var(--bd);border-radius:calc(var(--r)*.75);padding:10px 12px;color:var(--txt);font:13px 'JetBrains Mono',monospace;box-shadow:var(--ins);outline:0;resize:vertical}
+.ta:focus{border-color:var(--acc);box-shadow:var(--ins),var(--glow)}
+#impPrev{margin-top:10px}
+.imp-row{display:flex;gap:10px;align-items:center;font-size:12.5px;padding:7px 2px;border-bottom:1px solid var(--bd)}
+.imp-row .grow{flex:1;min-width:0}
+a.btn-secondary{text-decoration:none}
+@media(max-width:900px){.sch-head{grid-template-columns:1fr 1fr}.pk-dati{grid-template-columns:1fr}.pk{margin-left:6px}}
+/* ===== KIT STILI (dal gestionale magazzino Pagliani) ===== */
+.stg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stc{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:10px;border-radius:calc(var(--r)*.8);border:1px solid var(--bd2);background:var(--surf2);color:var(--txt);cursor:pointer;text-align:left;font:inherit;transition:.2s}
+.stc:hover{border-color:var(--acc)}.stc.on{border-color:var(--acc);box-shadow:var(--glow);background:color-mix(in srgb,var(--acc) 12%,var(--surf2))}
+.stc .stn{font:700 13.5px Inter;margin-top:6px}.stc small{font-size:11.5px;color:var(--mut);line-height:1.3}
+.stp{display:block;width:100%;height:58px;border-radius:9px;position:relative;overflow:hidden}
+.stp i,.stp b,.stp em{position:absolute;display:block}
+.stp i{left:10px;top:10px;right:10px;height:16px;border-radius:6px}.stp b{left:10px;bottom:10px;width:46%;height:16px;border-radius:999px}.stp em{right:10px;bottom:12px;width:30%;height:12px;border-radius:999px}
+.stp-neon{background:radial-gradient(60px 40px at 10% 0%,#3D5AFE66,transparent),radial-gradient(60px 40px at 100% 100%,#FF2FA355,transparent),#07080d}
+.stp-neon i{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}.stp-neon b{background:linear-gradient(90deg,#3D5AFE,#FF2FA3);box-shadow:0 0 12px #3D5AFE}.stp-neon em{border:1px solid #FF2FA388;background:#FF2FA322}
+.stp-glass{background:radial-gradient(50px 40px at 20% 30%,#22D3EE88,transparent),radial-gradient(60px 50px at 85% 70%,#A855F799,transparent),#121318}
+.stp-glass i{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(6px)}.stp-glass b{border-radius:7px;background:linear-gradient(90deg,#22D3EE,#A855F7);box-shadow:0 0 14px #22D3EE88}.stp-glass em{border-radius:7px;background:rgba(255,255,255,.1);border:1px solid #A855F7aa}
+.stp-blueprint{background:linear-gradient(#2BC4B81f 1px,transparent 1px) 0 0/10px 10px,linear-gradient(90deg,#2BC4B81f 1px,transparent 1px) 0 0/10px 10px,#0c2228}
+.stp-blueprint i{border-radius:2px;border:1px solid #2BC4B899;background:#0f2e35}.stp-blueprint b{border-radius:5px;border:1.5px solid #C9A46A;background:#14404a;box-shadow:inset 0 0 8px #2BC4B8aa}.stp-blueprint em{border-radius:4px;border:1px solid #D9826B;background:#D9826B33}
+.stp-minimal{background:#f4f5f7}.stp-minimal i{border-radius:4px;background:#fff;border:1px solid #dde1e7}.stp-minimal b{border-radius:5px;background:#2563EB}.stp-minimal em{border-radius:4px;background:#e8ebf0}
+.pgrp{font:700 10.5px Inter;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin:12px 0 8px}.pgrp:first-child{margin-top:0}
+
+/* ===== STILE · LIQUID GLASS ===== */
+html[data-style=glass]{--gb:linear-gradient(135deg,color-mix(in srgb,var(--acc) 70%,transparent),rgba(255,255,255,.10) 38%,rgba(255,255,255,.04) 62%,color-mix(in srgb,var(--acc2) 70%,transparent))}
+html[data-style=glass][data-theme=dark]{--gs:linear-gradient(150deg,rgba(255,255,255,.11),rgba(255,255,255,.035))}
+html[data-style=glass][data-theme=light]{--gs:linear-gradient(150deg,rgba(255,255,255,.78),rgba(255,255,255,.48))}
+html[data-style=glass] body{background:radial-gradient(700px 520px at 8% 12%,color-mix(in srgb,var(--acc) 34%,transparent),transparent 62%),radial-gradient(760px 560px at 96% 30%,color-mix(in srgb,var(--acc2) 32%,transparent),transparent 62%),radial-gradient(640px 480px at 40% 110%,color-mix(in srgb,var(--acc3) 26%,transparent),transparent 60%),var(--bg);background-attachment:fixed}
+html[data-style=glass] :is(.sidebar,.topbar,.card,.tile,.cat-card,.pal-pop,.modal,.stc,.uisec .seg){border:1px solid transparent;background:var(--gs) padding-box,var(--gb) border-box;backdrop-filter:blur(26px) saturate(1.8);-webkit-backdrop-filter:blur(26px) saturate(1.8);box-shadow:0 24px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.05)}
+html[data-style=glass][data-theme=light] :is(.sidebar,.topbar,.card,.tile,.cat-card,.pal-pop,.modal){box-shadow:0 18px 44px rgba(90,100,140,.18),inset 0 1px 0 #fff}
+html[data-style=glass] .modal{background:linear-gradient(150deg,color-mix(in srgb,var(--solid) 80%,transparent),color-mix(in srgb,var(--solid) 66%,transparent)) padding-box,var(--gb) border-box}
+html[data-style=glass] :is(.btn-secondary,.ib,.btn-mini){border-radius:calc(var(--r)*.75);border:1px solid transparent;background:var(--gs) padding-box,var(--gb) border-box;backdrop-filter:blur(12px)}
+html[data-style=glass] .btn-primary{background:linear-gradient(100deg,var(--acc),var(--acc2)) padding-box,linear-gradient(100deg,rgba(255,255,255,.55),rgba(255,255,255,.1)) border-box;color:var(--onAcc);box-shadow:0 0 26px color-mix(in srgb,var(--acc) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.5)}
+html[data-style=glass] .btn-danger{background-clip:padding-box}
+html[data-style=glass] :is(.field input,.cs-btn,.ta){border-radius:calc(var(--r)*.7);border:1px solid transparent;background:linear-gradient(color-mix(in srgb,var(--solid) 55%,transparent),color-mix(in srgb,var(--solid) 55%,transparent)) padding-box,linear-gradient(135deg,color-mix(in srgb,var(--acc) 45%,transparent),rgba(255,255,255,.08),color-mix(in srgb,var(--acc2) 45%,transparent)) border-box;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+html[data-style=glass] :is(.field input:focus,.cs-btn[aria-expanded=true],.ta:focus){background:linear-gradient(color-mix(in srgb,var(--solid) 65%,transparent),color-mix(in srgb,var(--solid) 65%,transparent)) padding-box,linear-gradient(135deg,var(--acc),var(--acc2)) border-box;box-shadow:0 0 18px color-mix(in srgb,var(--acc) 40%,transparent)}
+html[data-style=glass] .seg{border-radius:calc(var(--r)*.9);border:1px solid transparent;background:var(--gs) padding-box,var(--gb) border-box}
+html[data-style=glass] .seg button{border-radius:calc(var(--r)*.65)}
+html[data-style=glass] .seg button.on{color:var(--txt);border:1px solid transparent;background:linear-gradient(color-mix(in srgb,var(--acc) 22%,var(--solid)),color-mix(in srgb,var(--acc2) 16%,var(--solid))) padding-box,linear-gradient(120deg,var(--acc),var(--acc2)) border-box;box-shadow:0 0 18px color-mix(in srgb,var(--acc) 40%,transparent),inset 0 0 12px color-mix(in srgb,var(--acc) 25%,transparent)}
+html[data-style=glass] .sw i{border:1px solid transparent;background:linear-gradient(var(--surf2),var(--surf2)) padding-box,var(--gb) border-box}
+html[data-style=glass] .sw input:checked+i{background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 55%,var(--solid)),color-mix(in srgb,var(--acc2) 55%,var(--solid))) padding-box,linear-gradient(90deg,var(--acc),var(--acc2)) border-box}
+html[data-style=glass] .sw i::after{box-shadow:0 0 12px rgba(255,255,255,.9),0 2px 6px rgba(0,0,0,.3)}
+html[data-style=glass] .navitem.active{border:1px solid transparent;background:linear-gradient(color-mix(in srgb,var(--acc) 18%,var(--solid)),color-mix(in srgb,var(--acc2) 12%,var(--solid))) padding-box,linear-gradient(120deg,var(--acc),var(--acc2)) border-box}
+html[data-style=glass] :is(.modal h3,.panel-head)::after{height:1px;background:linear-gradient(90deg,transparent,var(--acc),var(--acc2),transparent)}
+
+/* ===== STILE · BLUEPRINT ===== */
+html[data-style=blueprint]{--r:6px;--bpl:color-mix(in srgb,var(--acc) 38%,transparent);--bpc:var(--acc);--brass:var(--acc3)}
+html[data-style=blueprint][data-theme=dark]{--surf:color-mix(in srgb,var(--bg2) 82%,transparent);--surf2:color-mix(in srgb,var(--bg) 70%,#000 12%);--surf3:color-mix(in srgb,var(--acc) 16%,var(--bg));--bd:color-mix(in srgb,var(--acc) 22%,transparent);--bd2:color-mix(in srgb,var(--acc) 38%,transparent);--txt:#e7f4f2;--mut:color-mix(in srgb,var(--acc) 30%,#93a7aa);--solid:color-mix(in srgb,var(--bg2) 92%,#000)}
+html[data-style=blueprint][data-theme=light]{--bd:color-mix(in srgb,var(--acc) 28%,transparent);--bd2:color-mix(in srgb,var(--acc) 45%,transparent)}
+html[data-style=blueprint] body{background:linear-gradient(color-mix(in srgb,var(--acc) 6%,transparent) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,color-mix(in srgb,var(--acc) 6%,transparent) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(color-mix(in srgb,var(--acc) 11%,transparent) 1px,transparent 1px) 0 0/110px 110px,linear-gradient(90deg,color-mix(in srgb,var(--acc) 11%,transparent) 1px,transparent 1px) 0 0/110px 110px,radial-gradient(1200px 700px at 50% 0%,color-mix(in srgb,var(--acc) 10%,transparent),transparent),var(--bg);background-attachment:fixed}
+html[data-style=blueprint] :is(.sidebar,.topbar,.card,.tile,.cat-card,.pal-pop,.modal){border:1px solid var(--bpl);box-shadow:0 0 0 3px color-mix(in srgb,var(--bg) 70%,transparent),0 0 0 4px color-mix(in srgb,var(--acc) 14%,transparent),0 14px 34px rgba(0,0,0,.35);backdrop-filter:blur(6px);
+  background:linear-gradient(var(--bpc),var(--bpc)) 0 0/12px 2px no-repeat,linear-gradient(var(--bpc),var(--bpc)) 0 0/2px 12px no-repeat,linear-gradient(var(--bpc),var(--bpc)) 100% 0/12px 2px no-repeat,linear-gradient(var(--bpc),var(--bpc)) 100% 0/2px 12px no-repeat,linear-gradient(var(--bpc),var(--bpc)) 0 100%/12px 2px no-repeat,linear-gradient(var(--bpc),var(--bpc)) 0 100%/2px 12px no-repeat,linear-gradient(var(--bpc),var(--bpc)) 100% 100%/12px 2px no-repeat,linear-gradient(var(--bpc),var(--bpc)) 100% 100%/2px 12px no-repeat,var(--surf)}
+html[data-style=blueprint] .modal{background-color:var(--solid)}
+html[data-style=blueprint] :is(.tag-head,.lbl,.panel-head>span,.hero small,.tile .lbl,.pgrp,.k){text-transform:uppercase;letter-spacing:1.4px}
+html[data-style=blueprint] :is(.panel-head>span,.modal h3,.ptitle){font-family:'Space Grotesk',Inter;letter-spacing:.8px}
+html[data-style=blueprint] .tag-head{color:var(--acc);background:color-mix(in srgb,var(--acc) 9%,var(--solid))}
+html[data-style=blueprint] :is(.btn-secondary,.ib,.btn-mini){border-radius:7px;border:1.5px solid color-mix(in srgb,var(--brass) 80%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 12%,var(--surf2)),color-mix(in srgb,var(--acc) 4%,var(--surf2)));box-shadow:inset 0 0 10px color-mix(in srgb,var(--acc) 22%,transparent),inset 0 1px 0 rgba(255,255,255,.08);letter-spacing:.3px}
+html[data-style=blueprint] :is(.btn-secondary,.ib,.btn-mini):hover{box-shadow:inset 0 0 14px color-mix(in srgb,var(--acc) 40%,transparent),0 0 14px color-mix(in srgb,var(--acc) 40%,transparent)}
+html[data-style=blueprint] .btn-primary{color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 42%,var(--bg)),color-mix(in srgb,var(--acc) 24%,var(--bg)));border:1.5px solid var(--brass);box-shadow:inset 0 0 14px color-mix(in srgb,var(--acc) 65%,transparent),0 0 16px color-mix(in srgb,var(--acc) 40%,transparent),0 0 0 3px color-mix(in srgb,var(--brass) 18%,transparent)}
+html[data-style=blueprint][data-theme=light] .btn-primary{color:#062a29}
+html[data-style=blueprint] .btn-danger{border-color:var(--acc2);color:var(--acc2);background:color-mix(in srgb,var(--acc2) 16%,transparent)}
+html[data-style=blueprint] :is(.field input,.cs-btn,.ta){border-radius:5px;border:1px solid var(--bd2);background:color-mix(in srgb,var(--bg) 75%,#000 10%)}
+html[data-style=blueprint][data-theme=light] :is(.field input,.cs-btn,.ta){background:#fff}
+html[data-style=blueprint] :is(.field input:focus,.cs-btn[aria-expanded=true],.ta:focus){border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+html[data-style=blueprint] .seg{border-radius:6px;padding:3px;gap:0;border:1px solid var(--bd2)}
+html[data-style=blueprint] .seg button{border-radius:4px;text-transform:uppercase;letter-spacing:1px;font-size:12px}
+html[data-style=blueprint] .seg button.on{background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--txt);border:1px solid var(--acc);box-shadow:inset 0 0 10px color-mix(in srgb,var(--acc) 40%,transparent),0 0 12px color-mix(in srgb,var(--acc) 35%,transparent)}
+html[data-style=blueprint] :is(.pill,.chip){border-radius:4px;text-transform:uppercase;letter-spacing:.8px;font-size:10px}
+html[data-style=blueprint] .pill::before{border-radius:1px;width:5px;height:5px}
+html[data-style=blueprint] .sw i{border-radius:999px;border:1.5px solid var(--brass)}
+html[data-style=blueprint] .sw input:checked+i{background:color-mix(in srgb,var(--acc) 45%,var(--bg));border-color:var(--brass)}
+html[data-style=blueprint] .navitem{border-radius:5px}
+html[data-style=blueprint] .navitem.active{background:color-mix(in srgb,var(--acc) 14%,transparent);border-color:var(--bpl);box-shadow:inset 3px 0 0 var(--acc),inset 0 0 16px color-mix(in srgb,var(--acc) 16%,transparent)}
+html[data-style=blueprint] :is(.modal h3,.panel-head)::after{background:linear-gradient(90deg,var(--acc),color-mix(in srgb,var(--brass) 70%,transparent),transparent);height:1px}
+html[data-style=blueprint] .cat-card::after,html[data-style=blueprint] .tile::after{opacity:.45}
+
+/* ===== STILE · ESSENZIALE ===== */
+html[data-style=minimal]{--glow:0 0 0 transparent;--glow2:0 0 0 transparent;--grad:var(--acc)}
+html[data-style=minimal][data-theme=dark]{--surf:#15171d;--surf2:#1c1f27;--surf3:#262a34;--bd:#2a2e38;--bd2:#363b47;--solid:#15171d}
+html[data-style=minimal][data-theme=light]{--surf:#fff;--surf2:#f5f6f8;--surf3:#fff;--bd:#e3e6ea;--bd2:#d3d7de;--solid:#fff;--sh:0 1px 2px rgba(20,28,45,.06);--ins:none}
+html[data-style=minimal] body{background:var(--bg)}
+html[data-style=minimal] *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html[data-style=minimal] :is(.sidebar,.topbar,.card,.tile,.cat-card,.pal-pop,.modal){box-shadow:0 1px 2px rgba(0,0,0,.08)}
+html[data-style=minimal] .cat-card::after,html[data-style=minimal] .tile::after{display:none}
+html[data-style=minimal] :is(.btn-secondary,.ib,.btn-mini){border-radius:8px;box-shadow:none;background:var(--surf2);border-color:var(--bd2)}
+html[data-style=minimal] :is(.btn-secondary,.ib,.btn-mini):hover{transform:none;border-color:var(--acc)}
+html[data-style=minimal] .btn-primary{background:var(--acc);box-shadow:none}
+html[data-style=minimal] .btn-primary:hover{box-shadow:none;filter:brightness(1.08)}
+html[data-style=minimal] :is(.field input,.cs-btn,.ta){border-radius:7px;box-shadow:none}
+html[data-style=minimal] :is(.field input:focus,.cs-btn[aria-expanded=true],.ta:focus){box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 20%,transparent)}
+html[data-style=minimal] .seg{border-radius:8px;box-shadow:none}
+html[data-style=minimal] .seg button{border-radius:6px}
+html[data-style=minimal] .seg button.on{background:var(--acc);box-shadow:none}
+html[data-style=minimal] .navitem.active{box-shadow:none;background:color-mix(in srgb,var(--acc) 12%,transparent);border-color:transparent}
+html[data-style=minimal] .pill::before{box-shadow:none}
+html[data-style=minimal] :is(.modal h3,.panel-head)::after{background:var(--bd);box-shadow:none}
+html[data-style=minimal] .sw input:checked+i{background:var(--acc);box-shadow:none}
+.stc{width:auto}
+/* Liquid Glass: testi secondari più leggibili sopra i colori di sfondo */
+html[data-style=glass][data-theme=dark]{--mut:#c9d0dc}
+html[data-style=glass][data-theme=light]{--mut:#465064}
+html[data-style=glass] .navitem{color:color-mix(in srgb,var(--txt) 80%,transparent)}
+@media (max-width:1100px){.dash-grid{grid-template-columns:1fr}}
+@media (max-width:900px){
+  html,body{overflow-x:hidden}
+  .app{flex-direction:column}
+  .sidebar{position:sticky;top:0;left:0;right:0;bottom:auto;width:auto;margin:10px 10px 0;flex-direction:row;align-items:center;padding:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:999px;z-index:30}
+  .sb-logo{padding:0 6px 0 2px;flex:none}.brand-t{display:none}.logo{width:34px;height:34px;font-size:16px;border-radius:50%}
+  .sb-nav{flex-direction:row;gap:3px;flex:none}
+  .navitem{white-space:nowrap;padding:8px 12px;border-radius:999px;font-size:13px;flex:none}
+  .navitem svg{width:17px;height:17px}
+  .sb-foot{display:none}
+  .main{margin-left:0;padding:10px 10px 0}
+  .topbar{position:relative;top:0;flex-wrap:wrap;padding:12px 14px;margin-bottom:14px}
+  .topbar>div:first-child{width:100%}
+  .ptitle{font-size:19px}
+  .demo-tag{margin-left:auto}
+  .tb-actions{width:100%;flex-wrap:wrap}
+  .tb-actions .ib{flex:1}
+  .tb-actions .btn-primary{flex:1 1 100%;order:3;padding:12px 16px}
+  .content{padding:0 0 40px}
+  .tiles{grid-template-columns:repeat(2,1fr);gap:10px}
+  .tile{padding:13px 14px}.tile .num{font-size:25px}
+  .cat-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .cat-card{padding:12px}.cat-top{font-size:12px;gap:7px}.cat-ico{width:26px;height:26px;font-size:13px}.cat-num{font-size:25px}
+  .tag-head{display:none}
+  .row{grid-template-columns:1fr 1fr;padding:12px 14px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .modal{padding:18px}
+  .toast{left:12px;right:12px;bottom:16px}
+  .pal-pop,.pal-pop.notif{top:auto;left:12px;right:12px;bottom:12px;width:auto;max-height:72vh}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div id="brandLogo" class="logo">A</div>
+      <div class="brand-t"><b id="brandNome">AUTOSCUOLA</b><small id="brandTag">GESTIONALE</small></div>
+    </div>
+    <div class="sb-nav">
+      <div class="navitem active" data-panel="dashboard"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="navitem" data-panel="scadenzario"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Scadenzario<span class="nb" id="navNb">0</span></div>
+      <div class="navitem" data-panel="allievi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Allievi</div>
+      <div class="navitem" data-panel="agenda"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>Agenda guide</div>
+      <div class="navitem" data-panel="esami"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v3h6V3"/><path d="M9 13l2 2 4-4"/></svg>Esami<span class="nb" id="navEs" style="display:none">0</span></div>
+      <div class="navitem" data-panel="mezzi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13l2-6a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 6"/><rect x="2" y="13" width="20" height="6" rx="1"/><circle cx="7" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>Parco mezzi</div>
+      <div class="navitem" data-panel="istruttori"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3v6.5M4 15l6-2.5M20 15l-6-2.5"/></svg>Istruttori</div>
+      <div class="navitem" data-panel="rinnovi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M13 10h6M13 14h4"/></svg>Rinnovi clienti</div>
+      <div class="navitem" data-panel="rifiuti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/><path d="M10 11v6M14 11v6"/></svg>Rifiuti</div>
+    </div>
+    <div class="sb-foot">Powered by<br><span>DepoTrack Solutions</span></div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="ptitle"><span id="pageTitle">Dashboard</span><span class="demo-tag">DEMO · DATI DI ESEMPIO</span></div>
+        <div id="pageSub"></div>
+      </div>
+      <div class="tb-actions">
+        <button class="ib" id="btnNotif" title="Promemoria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="cnt" id="notifN">0</span></button>
+        <button class="ib" id="btnAsp" title="Aspetto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 10c0-4.4-4.5-8-10-8z"/></svg>Aspetto</button>
+        <button class="btn-primary" id="btnNuovaGuida">+ Nuova guida</button>
+      </div>
+    </div>
+
+    <div class="content" id="content">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="tiles">
+          <div class="tile" data-go="allievi" style="--c:var(--acc)"><div class="lbl">Allievi in corso</div><div class="num" id="tAll">0</div></div>
+          <div class="tile" data-go="agenda" style="--c:var(--acc2)"><div class="lbl">Guide oggi</div><div class="num" id="tGuide">0</div></div>
+          <div class="tile" data-go="esami" style="--c:var(--acc3)"><div class="lbl">Esami prossimi 14 gg</div><div class="num" id="tEsami">0</div></div>
+          <div class="tile" data-go="scadenzario" style="--c:var(--ko)"><div class="lbl">Scadenze da gestire</div><div class="num" id="tScad">0</div></div>
+        </div>
+        <div id="alertBar" class="alert"></div>
+
+        <div class="sec-title">Scadenze per categoria · tocca per aprire</div>
+        <div class="cat-grid" id="catGrid"></div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="panel-head"><span>Prossime scadenze <small>· le più urgenti</small></span><button class="btn-secondary" data-go="scadenzario">Vedi tutte</button></div>
+            <div id="prossime"></div>
+          </div>
+          <div class="stack">
+            <div class="card">
+              <div class="panel-head"><span>Guide di oggi</span><button class="btn-secondary" data-go="agenda">Agenda</button></div>
+              <div id="guideOggi"></div>
+            </div>
+            <div class="card">
+              <div class="panel-head"><span>Esami in arrivo</span><button class="btn-secondary" data-go="esami">Agenda esami</button></div>
+              <div id="esamiList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCADENZARIO -->
+      <div class="panel" id="panel-scadenzario">
+        <div class="card">
+          <div class="panel-head"><span>Scadenzario unico <small>· allievi, clienti, istruttori, mezzi e rifiuti</small></span><button class="btn-secondary" id="btnSoloUrg">Solo entro 30 gg</button></div>
+          <div class="chips" id="chips"></div>
+          <div class="hint">Tocca una riga per modificarla o rinnovarla (cambi la data e lo stato si aggiorna da solo).</div>
+          <div class="tag-head"><div>Soggetto</div><div>Documento</div><div>Scadenza</div><div>Stato</div></div>
+          <div id="scadTable"></div>
+        </div>
+      </div>
+
+      <!-- ALLIEVI -->
+      <div class="panel" id="panel-allievi">
+        <div class="card">
+          <div class="panel-head"><span>Allievi</span><button class="btn-primary" id="btnNuovoAllievo">+ Nuovo allievo</button></div>
+          <div class="hint">Tocca un allievo per aprire la sua scheda: checklist della pratica, controllo esame e Pacchetto Motorizzazione.</div>
+          <div class="tag-head"><div>Allievo</div><div>Corso · fase</div><div>Guide · esame</div><div>Documenti</div></div>
+          <div id="allieviTable"></div>
+        </div>
+      </div>
+
+      <!-- AGENDA -->
+      <div class="panel" id="panel-agenda">
+        <div class="card">
+          <div class="panel-head"><span>Agenda guide</span><button class="btn-primary" id="btnNuovaGuida2">+ Nuova guida</button></div>
+          <div class="hint">Il sistema controlla da solo foglio rosa, revisione e assicurazione del mezzo, patente e CQC dell'istruttore alla data della guida.</div>
+          <div id="agendaList"></div>
+        </div>
+      </div>
+
+      <!-- ESAMI -->
+      <div class="panel" id="panel-esami">
+        <div class="card">
+          <div class="panel-head"><span>Agenda esami <small>· date prenotate sul Portale dell'Automobilista</small></span><button class="btn-primary" id="btnImpEsami">⇩ Importa date dal portale</button></div>
+          <div class="hint">Per ogni esame il sistema controlla, alla data dell'esame, foglio rosa, permesso di soggiorno, guide obbligatorie e checklist della pratica. Tocca un allievo per aprire la scheda.</div>
+          <div class="tag-head"><div>Allievo</div><div>Esame</div><div>Data</div><div>Controllo</div></div>
+          <div id="esamiTable"></div>
+        </div>
+      </div>
+
+      <!-- MEZZI -->
+      <div class="panel" id="panel-mezzi">
+        <div class="card">
+          <div class="panel-head"><span>Parco mezzi <small>· auto doppi comandi, moto e mezzi pesanti</small></span><button class="btn-primary" id="btnNuovoMezzo">+ Nuovo mezzo</button></div>
+          <div class="hint">Revisioni, pre-revisioni, tagliandi, tachigrafi, assicurazioni e bolli. Tocca un mezzo per aggiornarlo.</div>
+          <div class="tag-head"><div>Mezzo</div><div>Tipo · stato</div><div>Prossima scadenza</div><div>Stato</div></div>
+          <div id="mezziTable"></div>
+        </div>
+      </div>
+
+      <!-- ISTRUTTORI -->
+      <div class="panel" id="panel-istruttori">
+        <div class="card">
+          <div class="panel-head"><span>Istruttori e insegnanti</span><button class="btn-primary" id="btnNuovoIstr">+ Nuovo</button></div>
+          <div class="tag-head"><div>Nome</div><div>Ruolo · patenti</div><div>Patente</div><div>CQC</div></div>
+          <div id="istrTable"></div>
+        </div>
+      </div>
+
+      <!-- RINNOVI CLIENTI -->
+      <div class="panel" id="panel-rinnovi">
+        <div class="card">
+          <div class="panel-head"><span>Rinnovi clienti <small>· patenti, patenti superiori, CQC, ADR, permessi</small></span><button class="btn-primary" id="btnNuovaPratica">+ Nuovo cliente</button></div>
+          <div class="hint">Ex allievi e clienti a cui ricordare il rinnovo: con un tocco parte il promemoria WhatsApp o email (simulato).</div>
+          <div class="tag-head"><div>Cliente</div><div>Documento</div><div>Scadenza</div><div>Stato</div></div>
+          <div id="praticheTable"></div>
+        </div>
+      </div>
+
+      <!-- RIFIUTI -->
+      <div class="panel" id="panel-rifiuti">
+        <div class="card">
+          <div class="panel-head"><span>Scadenze rifiuti</span><button class="btn-primary" id="btnNuovaRifScad">+ Nuova scadenza</button></div>
+          <div class="tag-head"><div>Adempimento</div><div>Categoria</div><div>Scadenza</div><div>Stato</div></div>
+          <div id="rifScadTable"></div>
+        </div>
+        <div class="card">
+          <div class="panel-head"><span>Giacenze deposito temporaneo</span></div>
+          <div class="giac" id="giacenze"></div>
+        </div>
+        <div class="card">
+          <div class="panel-head"><span>Movimenti carico / scarico <small>· esempio semplificato</small></span><button class="btn-primary" id="btnNuovoMov">+ Movimento</button></div>
+          <div class="hint">Registro interno di comodo: quello ufficiale resta il RENTRI. Utile per sapere sempre quanto c'è in deposito e quando chiamare lo smaltitore.</div>
+          <div class="tag-head"><div>Data</div><div>Codice EER · rifiuto</div><div>Quantità · tipo</div><div>Formulario</div></div>
+          <div id="movTable"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- modale generico -->
+<div class="modal-backdrop" id="modalForm">
+  <div class="modal">
+    <h3 id="fTitolo">Modifica</h3>
+    <div id="fBody"></div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="fElimina">Elimina</button>
+      <button class="btn-secondary" id="fAnnulla">Annulla</button>
+      <button class="btn-primary" id="fSalva">Salva</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalScheda">
+  <div class="modal wide">
+    <h3 id="schTitolo">Scheda allievo</h3>
+    <div id="schBody"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="schModifica" style="margin-right:auto">✎ Modifica dati</button>
+      <button class="btn-secondary" id="schChiudi">Chiudi</button>
+      <button class="btn-primary" id="schPack">📦 Pacchetto Motorizzazione</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalPack">
+  <div class="modal wide">
+    <h3 id="packTitolo">Pacchetto Motorizzazione</h3>
+    <div id="packBody"></div>
+    <div class="modal-actions">
+      <a class="btn-secondary" href="https://www.ilportaledellautomobilista.it" target="_blank" rel="noopener" style="margin-right:auto">Apri portale ↗</a>
+      <button class="btn-secondary" id="packScarica">⇩ Scarica riepilogo</button>
+      <button class="btn-secondary" id="packChiudi">Chiudi</button>
+      <button class="btn-primary" id="packCopia">⧉ Copia dati</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalImp">
+  <div class="modal wide">
+    <h3>Importa date d'esame dal portale</h3>
+    <div class="sm" style="margin-bottom:10px">Incolla le prenotazioni copiate dal Portale dell'Automobilista, una per riga:<br><span class="mono">Nome allievo; gg/mm/aaaa; Teoria o Pratica</span></div>
+    <textarea id="impTxt" class="ta" rows="6" placeholder="Sara M.; 25/11/2026; Pratica"></textarea>
+    <div id="impPrev"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="impEsempio" style="margin-right:auto">Inserisci esempio</button>
+      <button class="btn-secondary" id="impAnnulla">Annulla</button>
+      <button class="btn-primary" id="impOk">Importa</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalMsg">
+  <div class="modal">
+    <h3>Anteprima promemoria</h3>
+    <div class="seg"><button data-ch="wa" class="on">WhatsApp</button><button data-ch="em">Email</button></div>
+    <div id="msgPreview"></div>
+    <div class="msg-note" id="msgNote"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="msgAnnulla">Annulla</button>
+      <button class="btn-primary" id="msgInvia">Invia (simulato)</button>
+    </div>
+  </div>
+</div>
+
+<div class="pal-pop notif" id="notifPop">
+  <h4>Promemoria · scadute ed entro 30 giorni</h4>
+  <div id="notifList"></div>
+  <button class="btn-primary" id="notifTutti" style="width:100%; justify-content:center; margin-top:10px;">Invia tutti</button>
+  <div class="msg-note">Simulazione: in produzione i promemoria partono in automatico 30 giorni prima, via WhatsApp o email.</div>
+</div>
+<div class="pal-pop" id="aspPop"><h4>Aspetto</h4><div id="aspBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIGURAZIONE CLIENTE — per una nuova autoscuola basta cambiare questo blocco
+// ============================================================
+const CONFIG = {
+  id: 'autoscuola-demo',
+  nome: 'AUTOSCUOLA DEMO',
+  sigla: 'A',
+  logoUrl: '',                    // URL o data:image/... (vuoto = sigla)
+  citta: 'Paullo (MI)',
+  tagline: 'PATENTI · CQC · ADR',
+  titolo: 'DepoTrack per Autoscuola — Demo',
+  paletteIniziale: 'synth'    // synth, halloween, cadet, voltage, moderna, petrolio, turmeric
+};
+
+// ============================================================
+// UTILITÀ DATE
+// ============================================================
+function toIso(d){ const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function isoFromOffset(g){ const d=new Date(); d.setDate(d.getDate()+g); return toIso(d); }
+function giorniDa(iso){ const p=iso.split('-').map(Number); const t=new Date(); t.setHours(0,0,0,0); return Math.round((new Date(p[0],p[1]-1,p[2])-t)/86400000); }
+function fmtData(iso){ if(!iso) return '—'; const p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function esc(x){ return String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function prossimo30Aprile(){ const t=new Date(); t.setHours(0,0,0,0); let y=t.getFullYear(); if(new Date(y,3,30)<t) y++; return y+'-04-30'; }
+function statoScadenza(g){ return g<0?'Scaduta':(g<=30?'In scadenza':'OK'); }
+const pillStyle = {
+  'Scaduta':'--pc:var(--ko)', 'In scadenza':'--pc:var(--warn)', 'OK':'--pc:var(--ok)',
+  'Disponibile':'--pc:var(--ok)', 'In guida':'--pc:var(--acc)', 'In officina':'--pc:var(--warn)', 'Fermo':'--pc:var(--ko)',
+};
+function pillScad(g){
+  const st=statoScadenza(g);
+  const t = st==='Scaduta' ? 'Scaduta da '+Math.abs(g)+' gg' : (st==='In scadenza' ? (g===0?'Scade oggi':'Tra '+g+' gg') : 'OK · '+g+' gg');
+  return '<span class="pill" style="'+pillStyle[st]+'">'+t+'</span>';
+}
+const EMPTY = t => '<div class="empty">'+t+'</div>';
+
+// ============================================================
+// CATEGORIE DI SCADENZA
+// ============================================================
+const CATS = {
+  patente:     {nome:'Patenti A / B',            ico:'🪪'},
+  superiore:   {nome:'Patenti superiori C / D / E', ico:'🚛'},
+  cqc:         {nome:'CQC merci e persone',      ico:'🎓'},
+  adr:         {nome:'ADR merci pericolose',     ico:'⚠️'},
+  permesso:    {nome:'Permessi di soggiorno',    ico:'🛂'},
+  foglio:      {nome:'Fogli rosa',               ico:'📄'},
+  revisione:   {nome:'Revisioni mezzi',          ico:'🔧'},
+  prerevisione:{nome:'Pre-revisioni',            ico:'🔍'},
+  manutenzione:{nome:'Manutenzioni e tachigrafi',ico:'🛠️'},
+  assic:       {nome:'Assicurazioni e bolli',    ico:'🛡️'},
+  rifiuti:     {nome:'Rifiuti e adempimenti',    ico:'♻️'},
+};
+
+// ============================================================
+// DATI DEMO — tutti fittizi
+// ============================================================
+const TIPI_MEZZO = ['Auto doppi comandi','Moto','Autocarro','Autocarro scarrabile','Trattore stradale','Rimorchio / semirimorchio','Autobus'];
+const PESANTI = ['Autocarro','Autocarro scarrabile','Trattore stradale','Rimorchio / semirimorchio','Autobus'];
+const STATI_MEZZO = ['Disponibile','In guida','In officina','Fermo'];
+const MEZZO_SCAD = [
+  {f:'revisione',     cat:'revisione',    tipo:'Revisione',      label:'Revisione'},
+  {f:'prerevisione',  cat:'prerevisione', tipo:'Pre-revisione',  label:'Pre-revisione (mezzi pesanti)'},
+  {f:'scarrabile',    cat:'revisione',    tipo:'Verifica impianto scarrabile', label:'Verifica impianto scarrabile'},
+  {f:'manutenzione',  cat:'manutenzione', tipo:'Tagliando',      label:'Prossimo tagliando'},
+  {f:'tachigrafo',    cat:'manutenzione', tipo:'Taratura tachigrafo', label:'Taratura tachigrafo'},
+  {f:'assicurazione', cat:'assic',        tipo:'Assicurazione',  label:'Assicurazione'},
+  {f:'bollo',         cat:'assic',        tipo:'Bollo',          label:'Bollo'},
+];
+let mezzi = [
+  {id:'m1', targa:'DEMO-01', modello:'Utilitaria doppi comandi',     tipo:'Auto doppi comandi', stato:'Disponibile', revisione:isoFromOffset(240), prerevisione:'', manutenzione:isoFromOffset(12), tachigrafo:'', assicurazione:isoFromOffset(95), bollo:isoFromOffset(150)},
+  {id:'m2', targa:'DEMO-02', modello:'Compatta doppi comandi',       tipo:'Auto doppi comandi', stato:'In guida',    revisione:isoFromOffset(-5),  prerevisione:'', manutenzione:isoFromOffset(60), tachigrafo:'', assicurazione:isoFromOffset(20), bollo:isoFromOffset(200)},
+  {id:'m3', targa:'DEMO-03', modello:'Ibrida cambio automatico',     tipo:'Auto doppi comandi', stato:'Disponibile', revisione:isoFromOffset(500), prerevisione:'', manutenzione:isoFromOffset(3),  tachigrafo:'', assicurazione:isoFromOffset(180), bollo:isoFromOffset(41)},
+  {id:'m4', targa:'DEMO-04', modello:'Moto 125 cc (A1)',             tipo:'Moto',               stato:'Disponibile', revisione:isoFromOffset(300), prerevisione:'', manutenzione:isoFromOffset(40), tachigrafo:'', assicurazione:isoFromOffset(8),  bollo:''},
+  {id:'m5', targa:'DEMO-05', modello:'Moto 690 cc (A2/A)',           tipo:'Moto',               stato:'Disponibile', revisione:isoFromOffset(200), prerevisione:'', manutenzione:isoFromOffset(90), tachigrafo:'', assicurazione:isoFromOffset(130), bollo:''},
+  {id:'m6', targa:'DEMO-06', modello:'Autocarro 18 t (patente C)',   tipo:'Autocarro',          stato:'Disponibile', revisione:isoFromOffset(26),  prerevisione:isoFromOffset(12), manutenzione:isoFromOffset(70), tachigrafo:isoFromOffset(45), assicurazione:isoFromOffset(110), bollo:isoFromOffset(160)},
+  {id:'m7', targa:'DEMO-07', modello:'Trattore stradale (CE)',       tipo:'Trattore stradale',  stato:'Disponibile', revisione:isoFromOffset(80),  prerevisione:isoFromOffset(66), manutenzione:isoFromOffset(35), tachigrafo:isoFromOffset(-2), assicurazione:isoFromOffset(140), bollo:isoFromOffset(220)},
+  {id:'m8', targa:'DEMO-08', modello:'Semirimorchio centinato (CE)', tipo:'Rimorchio / semirimorchio', stato:'Disponibile', revisione:isoFromOffset(18), prerevisione:isoFromOffset(4), manutenzione:'', tachigrafo:'', assicurazione:isoFromOffset(140), bollo:''},
+  {id:'m10', targa:'DEMO-10', modello:'Autocarro scarrabile 26 t (C)', tipo:'Autocarro scarrabile', stato:'Disponibile', revisione:isoFromOffset(150), prerevisione:isoFromOffset(136), scarrabile:isoFromOffset(16), manutenzione:isoFromOffset(48), tachigrafo:isoFromOffset(210), assicurazione:isoFromOffset(75), bollo:isoFromOffset(120)},
+  {id:'m9', targa:'DEMO-09', modello:'Autobus 12 m (patente D)',     tipo:'Autobus',            stato:'In officina', revisione:isoFromOffset(140), prerevisione:isoFromOffset(126), manutenzione:isoFromOffset(9), tachigrafo:isoFromOffset(300), assicurazione:isoFromOffset(60), bollo:isoFromOffset(90)},
+];
+const CORSI = ['AM','A1','A2','A','B','B96','BE','C1','C','CE','D1','D','DE','CQC merci','CQC persone','ADR base','ADR cisterne','Recupero punti'];
+const FASI = ['Teoria','Foglio rosa','Guide','Esame prenotato','Patentato'];
+const GUIDE_OBBL = {B:6};   // ore di guida obbligatorie per la B (esempio)
+let allievi = [
+  {id:'a1', nome:'Giulia R.',   tel:'+39 333 000 0101', corso:'B',          fase:'Esame prenotato', guide:5, foglio:isoFromOffset(40),  permesso:'',                 esame:isoFromOffset(9),  esameTipo:'Pratica'},
+  {id:'a2', nome:'Ahmed K.',    tel:'+39 333 000 0102', corso:'B',          fase:'Teoria',          guide:0, foglio:'',                 permesso:isoFromOffset(22),  esame:isoFromOffset(5),  esameTipo:'Teoria'},
+  {id:'a3', nome:'Sara M.',     tel:'+39 333 000 0103', corso:'A2',         fase:'Foglio rosa',     guide:2, foglio:isoFromOffset(12),  permesso:'',                 esame:'',                esameTipo:''},
+  {id:'a4', nome:'Luca F.',     tel:'+39 333 000 0104', corso:'C',          fase:'Guide',           guide:7, foglio:isoFromOffset(150), permesso:'',                 esame:'',                esameTipo:''},
+  {id:'a5', nome:'Ion P.',      tel:'+39 333 000 0105', corso:'CE',         fase:'Esame prenotato', guide:9, foglio:isoFromOffset(60),  permesso:isoFromOffset(-6),  esame:isoFromOffset(3),  esameTipo:'Pratica'},
+  {id:'a6', nome:'Martina C.',  tel:'+39 333 000 0106', corso:'B',          fase:'Guide',           guide:6, foglio:isoFromOffset(-2),  permesso:'',                 esame:'',                esameTipo:''},
+  {id:'a7', nome:'Riccardo V.', tel:'+39 333 000 0107', corso:'CQC merci',  fase:'Teoria',          guide:0, foglio:'',                 permesso:'',                 esame:isoFromOffset(18), esameTipo:'CQC'},
+  {id:'a8', nome:'Fatima B.',   tel:'+39 333 000 0108', corso:'B',          fase:'Guide',           guide:3, foglio:isoFromOffset(200), permesso:isoFromOffset(95),  esame:'',                esameTipo:''},
+  {id:'a9', nome:'Marco D.',    tel:'+39 333 000 0109', corso:'ADR base',   fase:'Teoria',          guide:0, foglio:'',                 permesso:'',                 esame:isoFromOffset(11), esameTipo:'ADR'},
+];
+// checklist pratica (documenti già consegnati) e codice fiscale fittizio
+const CHK0 = {a1:'doc cf medico foto firma vers', a2:'doc cf foto firma perm', a3:'doc cf medico foto firma', a4:'doc cf medico foto firma vers',
+  a5:'doc cf medico foto firma vers perm', a6:'doc cf medico foto firma vers', a7:'doc cf medico foto vers', a8:'doc cf medico foto firma vers perm', a9:'doc cf medico foto firma vers'};
+allievi.forEach((a,i) => { a.chk = {}; (CHK0[a.id]||'').split(' ').forEach(k=>{ if (k) a.chk[k] = true; }); a.cf = 'CF-DEMO-'+String(i+1).padStart(4,'0'); });
+const RUOLI = ['Istruttore di guida','Insegnante di teoria','Istruttore e insegnante'];
+let istruttori = [
+  {id:'i1', nome:'Roberto G.', ruolo:'Istruttore di guida',     patente:'A B C D E', scadPat:isoFromOffset(380), cqc:isoFromOffset(27)},
+  {id:'i2', nome:'Elena S.',   ruolo:'Insegnante di teoria',    patente:'B',         scadPat:isoFromOffset(15),  cqc:''},
+  {id:'i3', nome:'Franco L.',  ruolo:'Istruttore e insegnante', patente:'B C E',     scadPat:isoFromOffset(700), cqc:isoFromOffset(-10)},
+  {id:'i4', nome:'Paola T.',   ruolo:'Istruttore di guida',     patente:'A B',       scadPat:isoFromOffset(900), cqc:''},
+];
+const CAT_PRATICA = [{v:'patente',t:'Patente A / B'},{v:'superiore',t:'Patente superiore C / D / E'},{v:'cqc',t:'CQC'},{v:'adr',t:'ADR'},{v:'permesso',t:'Permesso di soggiorno'}];
+let pratiche = [
+  {id:'c1',  nome:'Giuseppe B.', tel:'+39 340 000 0201', cat:'patente',   tipo:'Patente B',              scad:isoFromOffset(12)},
+  {id:'c2',  nome:'Anna V.',     tel:'+39 340 000 0202', cat:'patente',   tipo:'Patente B',              scad:isoFromOffset(45)},
+  {id:'c3',  nome:'Mario N.',    tel:'+39 340 000 0203', cat:'superiore', tipo:'Patente C',              scad:isoFromOffset(-4)},
+  {id:'c4',  nome:'Davide R.',   tel:'+39 340 000 0204', cat:'superiore', tipo:'Patente CE',             scad:isoFromOffset(28)},
+  {id:'c5',  nome:'Salvatore E.',tel:'+39 340 000 0205', cat:'superiore', tipo:'Patente D',              scad:isoFromOffset(70)},
+  {id:'c6',  nome:'Giorgio C.',  tel:'+39 340 000 0206', cat:'cqc',       tipo:'CQC merci',              scad:isoFromOffset(19)},
+  {id:'c7',  nome:'Piero F.',    tel:'+39 340 000 0207', cat:'cqc',       tipo:'CQC persone',            scad:isoFromOffset(55)},
+  {id:'c8',  nome:'Lorenzo M.',  tel:'+39 340 000 0208', cat:'adr',       tipo:'Certificato ADR base',   scad:isoFromOffset(7)},
+  {id:'c9',  nome:'Renato C.',   tel:'+39 340 000 0209', cat:'adr',       tipo:'Certificato ADR cisterne', scad:isoFromOffset(90)},
+  {id:'c10', nome:'Mihai T.',    tel:'+39 340 000 0210', cat:'permesso',  tipo:'Permesso di soggiorno',  scad:isoFromOffset(14)},
+  {id:'c11', nome:'Joy O.',      tel:'+39 340 000 0211', cat:'permesso',  tipo:'Permesso di soggiorno',  scad:isoFromOffset(-1)},
+  {id:'c12', nome:'Federico G.', tel:'+39 340 000 0212', cat:'patente',   tipo:'Patente A',              scad:isoFromOffset(130)},
+];
+let rifScad = [
+  {id:'r1', tipo:'Ritiro oli esausti e filtri (smaltitore)',  scad:isoFromOffset(6)},
+  {id:'r2', tipo:'Annotazione movimenti sul registro RENTRI', scad:isoFromOffset(2)},
+  {id:'r3', tipo:'Deposito temporaneo: limite trimestrale',   scad:isoFromOffset(25)},
+  {id:'r4', tipo:'MUD – dichiarazione annuale',              scad:prossimo30Aprile()},
+  {id:'r5', tipo:'Rinnovo contratto ditta smaltimento',       scad:isoFromOffset(160)},
+];
+const EER = [
+  {v:'13 02 05*', t:'Oli minerali esausti'},
+  {v:'16 01 07*', t:'Filtri dell\'olio'},
+  {v:'16 06 01*', t:'Batterie al piombo'},
+  {v:'16 01 03',  t:'Pneumatici fuori uso'},
+  {v:'15 02 02*', t:'Stracci e assorbenti contaminati'},
+  {v:'16 01 14*', t:'Liquidi antigelo'},
+];
+let movimenti = [
+  {id:'mv1', data:isoFromOffset(-20), eer:'13 02 05*', tipo:'Carico',  kg:60,  fir:''},
+  {id:'mv2', data:isoFromOffset(-18), eer:'16 01 07*', tipo:'Carico',  kg:8,   fir:''},
+  {id:'mv3', data:isoFromOffset(-12), eer:'16 06 01*', tipo:'Carico',  kg:35,  fir:''},
+  {id:'mv4', data:isoFromOffset(-9),  eer:'16 01 03',  tipo:'Carico',  kg:120, fir:''},
+  {id:'mv5', data:isoFromOffset(-6),  eer:'13 02 05*', tipo:'Carico',  kg:40,  fir:''},
+  {id:'mv6', data:isoFromOffset(-3),  eer:'13 02 05*', tipo:'Scarico', kg:60,  fir:'FIR DEMO-0042'},
+];
+const TIPI_GUIDA = ['Urbana','Extraurbana','Autostrada','Notturna','Manovre','Circuito moto','Simulazione esame'];
+let guide = [
+  {id:'g1', data:isoFromOffset(0), ora:'08:00', aid:'a1', iid:'i3', mid:'m2', tipo:'Extraurbana'},
+  {id:'g2', data:isoFromOffset(0), ora:'09:00', aid:'a8', iid:'i3', mid:'m3', tipo:'Urbana'},
+  {id:'g3', data:isoFromOffset(0), ora:'10:30', aid:'a4', iid:'i1', mid:'m6', tipo:'Manovre'},
+  {id:'g4', data:isoFromOffset(0), ora:'14:00', aid:'a3', iid:'i4', mid:'m5', tipo:'Circuito moto'},
+  {id:'g5', data:isoFromOffset(0), ora:'15:30', aid:'a5', iid:'i1', mid:'m7', tipo:'Simulazione esame'},
+  {id:'g6', data:isoFromOffset(0), ora:'17:30', aid:'a6', iid:'i3', mid:'m1', tipo:'Notturna'},
+  {id:'g7', data:isoFromOffset(1), ora:'08:30', aid:'a4', iid:'i3', mid:'m6', tipo:'Extraurbana'},
+  {id:'g8', data:isoFromOffset(1), ora:'11:00', aid:'a1', iid:'i3', mid:'m1', tipo:'Autostrada'},
+  {id:'g9', data:isoFromOffset(2), ora:'09:00', aid:'a8', iid:'i4', mid:'m3', tipo:'Autostrada'},
+];
+const inviati = {};
+let catFiltro = 'all', soloUrg = false;
+
+// ============================================================
+// AGGREGAZIONE SCADENZE
+// ============================================================
+function catPatente(p){ return /[CDE]/.test(p) ? 'superiore' : 'patente'; }
+function tutteScadenze(){
+  const out = [];
+  pratiche.forEach(p => out.push({key:'p'+p.id, src:'pratica', id:p.id, cat:p.cat, tipo:p.tipo, soggetto:p.nome, sub:'Cliente · '+p.tel, scad:p.scad, contatto:p.tel}));
+  allievi.forEach(a => {
+    if (a.foglio && a.fase!=='Patentato') out.push({key:'af'+a.id, src:'allievo', id:a.id, cat:'foglio', tipo:'Foglio rosa '+a.corso, soggetto:a.nome, sub:'Allievo · '+a.corso, scad:a.foglio, contatto:a.tel});
+    if (a.permesso) out.push({key:'ap'+a.id, src:'allievo', id:a.id, cat:'permesso', tipo:'Permesso di soggiorno', soggetto:a.nome, sub:'Allievo · '+a.corso, scad:a.permesso, contatto:a.tel});
+  });
+  istruttori.forEach(i => {
+    out.push({key:'ip'+i.id, src:'istruttore', id:i.id, cat:catPatente(i.patente), tipo:'Patente '+i.patente, soggetto:i.nome, sub:i.ruolo, scad:i.scadPat, contatto:'istruttore'});
+    if (i.cqc) out.push({key:'ic'+i.id, src:'istruttore', id:i.id, cat:'cqc', tipo:'CQC', soggetto:i.nome, sub:i.ruolo, scad:i.cqc, contatto:'istruttore'});
+  });
+  mezzi.forEach(m => MEZZO_SCAD.forEach(s => {
+    if (m[s.f]) out.push({key:'m'+s.f+m.id, src:'mezzo', id:m.id, cat:s.cat, tipo:s.tipo, soggetto:m.targa, sub:m.modello, scad:m[s.f], contatto:'responsabile'});
+  }));
+  rifScad.forEach(r => out.push({key:'r'+r.id, src:'rifiuto', id:r.id, cat:'rifiuti', tipo:r.tipo, soggetto:'Area rifiuti', sub:'Adempimento', scad:r.scad, contatto:'responsabile'}));
+  return out.map(x => Object.assign({g:giorniDa(x.scad)}, x)).sort((a,b) => a.g-b.g);
+}
+function urgenti(){ return tutteScadenze().filter(x => x.g<=30); }
+
+function scadRow(x, showCat){
+  return '<div class="row clickable" data-src="'+x.src+'" data-id="'+x.id+'">'+
+    '<div><strong>'+esc(x.soggetto)+'</strong><small>'+esc(x.sub)+'</small></div>'+
+    '<div>'+esc(x.tipo)+(showCat?'<small>'+CATS[x.cat].ico+' '+esc(CATS[x.cat].nome)+'</small>':'')+'</div>'+
+    '<div class="mono">'+fmtData(x.scad)+'</div>'+
+    '<div>'+pillScad(x.g)+'</div></div>';
+}
+
+// ============================================================
+// CONTROLLI SULLE GUIDE
+// ============================================================
+function warnGuida(g){
+  const w = [], dG = giorniDa(g.data);
+  const a = allievi.find(x=>x.id===g.aid), m = mezzi.find(x=>x.id===g.mid), i = istruttori.find(x=>x.id===g.iid);
+  if (a) {
+    if (a.foglio && giorniDa(a.foglio) < dG) w.push('foglio rosa scaduto');
+    if (!a.foglio && a.fase!=='Patentato' && !/CQC|ADR|Recupero/.test(a.corso)) w.push('foglio rosa mancante');
+    if (a.permesso && giorniDa(a.permesso) < dG) w.push('permesso di soggiorno scaduto');
+  }
+  if (m) {
+    if (m.revisione && giorniDa(m.revisione) < dG) w.push('revisione '+m.targa+' scaduta');
+    if (m.assicurazione && giorniDa(m.assicurazione) < dG) w.push('assicurazione '+m.targa+' scaduta');
+    if (m.stato==='In officina' || m.stato==='Fermo') w.push(m.targa+' '+m.stato.toLowerCase());
+  } else w.push('nessun mezzo');
+  if (i) {
+    if (giorniDa(i.scadPat) < dG) w.push('patente istruttore scaduta');
+    if (m && PESANTI.includes(m.tipo) && i.cqc && giorniDa(i.cqc) < dG) w.push('CQC istruttore scaduta');
+    if (i.ruolo==='Insegnante di teoria') w.push('insegnante solo teoria');
+  }
+  return w;
+}
+function guidaRow(g, conData){
+  const a = allievi.find(x=>x.id===g.aid), m = mezzi.find(x=>x.id===g.mid), i = istruttori.find(x=>x.id===g.iid);
+  const w = warnGuida(g);
+  return '<div class="row clickable" data-src="guida" data-id="'+g.id+'">'+
+    '<div><strong class="mono">'+esc(g.ora)+'</strong> '+esc(a?a.nome:'—')+'<small>'+(a?esc(a.corso):'')+(conData?' · '+fmtData(g.data):'')+'</small></div>'+
+    '<div>'+esc(g.tipo)+'<small>'+(i?esc(i.nome):'—')+'</small></div>'+
+    '<div class="mono">'+(m?esc(m.targa):'—')+'<small>'+(m?esc(m.modello):'')+'</small></div>'+
+    '<div>'+(w.length ? '<span class="pill" style="'+pillStyle['Scaduta']+'">⚠ '+w.length+' problem'+(w.length>1?'i':'a')+'</span><span class="warn">'+esc(w.join(' · '))+'</span>' : '<span class="pill" style="'+pillStyle['OK']+'">Tutto in regola</span>')+'</div></div>';
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderDashboard(){
+  const oggi = isoFromOffset(0);
+  const all = tutteScadenze(), urg = all.filter(x=>x.g<=30), sc = urg.filter(x=>x.g<0).length;
+  const esami = allievi.filter(a => a.esame && giorniDa(a.esame)>=0).sort((a,b)=>giorniDa(a.esame)-giorniDa(b.esame));
+  document.getElementById('tAll').textContent = allievi.filter(a=>a.fase!=='Patentato').length;
+  document.getElementById('tGuide').textContent = guide.filter(g=>g.data===oggi).length;
+  document.getElementById('tEsami').textContent = esami.filter(a=>giorniDa(a.esame)<=14).length;
+  document.getElementById('tScad').textContent = urg.length;
+  document.getElementById('navNb').textContent = urg.length;
+  document.getElementById('navNb').style.display = urg.length ? '' : 'none';
+  const bar = document.getElementById('alertBar');
+  const guideKo = guide.filter(g=>g.data===oggi && warnGuida(g).length).length;
+  const esamiKo = esamiOrd().filter(a=>giorniDa(a.esame)<=14 && warnEsame(a).length).length;
+  if (urg.length || guideKo || esamiKo) {
+    bar.style.display = 'block';
+    bar.innerHTML = '<strong>'+sc+' scadute</strong> e <strong>'+(urg.length-sc)+' in scadenza</strong> nei prossimi 30 giorni'+(guideKo?' · <strong>'+guideKo+' guide di oggi</strong> con documenti non in regola':'')+(esamiKo?' · <strong>'+esamiKo+' esami</strong> nei prossimi 14 giorni con problemi':'')+'. Tocca 🔔 per mandare i promemoria.';
+  } else bar.style.display = 'none';
+
+  document.getElementById('catGrid').innerHTML = Object.keys(CATS).map(k => {
+    const l = all.filter(x=>x.cat===k), s = l.filter(x=>x.g<0).length, i = l.filter(x=>x.g>=0 && x.g<=30).length;
+    const col = s ? 'var(--ko)' : (i ? 'var(--warn)' : 'var(--ok)');
+    return '<div class="cat-card" data-cat="'+k+'" style="--c:'+col+'">'+
+      '<div class="cat-top"><span class="cat-ico">'+CATS[k].ico+'</span><span>'+esc(CATS[k].nome)+'</span></div>'+
+      '<div class="cat-num">'+(s+i)+'<span>da gestire</span></div>'+
+      '<div class="cat-sub">'+s+' scadute · '+i+' entro 30 gg · '+l.length+' totali</div></div>';
+  }).join('');
+
+  document.getElementById('prossime').innerHTML = urg.slice(0,9).map(x=>scadRow(x,true)).join('') || EMPTY('Nessuna scadenza nei prossimi 30 giorni. 🎉');
+  document.getElementById('guideOggi').innerHTML = guide.filter(g=>g.data===oggi).sort((a,b)=>a.ora<b.ora?-1:1).map(g=>guidaRow(g,false)).join('') || EMPTY('Nessuna guida oggi.');
+  document.getElementById('esamiList').innerHTML = esamiOrd().slice(0,6).map(esameRow).join('') || EMPTY('Nessun esame in programma.');
+  const esKo = esamiOrd().filter(a=>warnEsame(a).length).length;
+  const nb = document.getElementById('navEs'); nb.textContent = esKo; nb.style.display = esKo ? '' : 'none';
+}
+
+function renderScadenzario(){
+  const all = tutteScadenze();
+  const chip = (k, nome) => {
+    const l = k==='all' ? all : all.filter(x=>x.cat===k);
+    const u = l.filter(x=>x.g<=30).length;
+    return '<button class="chip'+(catFiltro===k?' on':'')+'" data-chip="'+k+'">'+nome+(u?'<b>'+u+'</b>':'')+'</button>';
+  };
+  document.getElementById('chips').innerHTML = chip('all','Tutte') + Object.keys(CATS).map(k=>chip(k, CATS[k].ico+' '+CATS[k].nome)).join('');
+  let l = catFiltro==='all' ? all : all.filter(x=>x.cat===catFiltro);
+  if (soloUrg) l = l.filter(x=>x.g<=30);
+  document.getElementById('btnSoloUrg').textContent = soloUrg ? 'Mostra tutte' : 'Solo entro 30 gg';
+  document.getElementById('scadTable').innerHTML = l.map(x=>scadRow(x,true)).join('') || EMPTY('Nessuna scadenza per questo filtro.');
+}
+
+function renderAllievi(){
+  document.getElementById('allieviTable').innerHTML = allievi.map(a => {
+    const ob = GUIDE_OBBL[a.corso];
+    const docs = [];
+    if (a.foglio && a.fase!=='Patentato') docs.push({n:'Foglio rosa', g:giorniDa(a.foglio)});
+    if (a.permesso) docs.push({n:'Permesso', g:giorniDa(a.permesso)});
+    docs.sort((x,y)=>x.g-y.g);
+    const d = docs[0];
+    const guideTxt = ob ? a.guide+' / '+ob+' guide obbligatorie' : a.guide+' guide svolte';
+    const pct = ob ? Math.min(100, a.guide/ob*100) : 0;
+    return '<div class="row clickable" data-src="allievo" data-id="'+a.id+'">'+
+      '<div><strong>'+esc(a.nome)+'</strong><small>'+esc(a.tel)+'</small><small style="color:'+(chkStato(a).pronta?'var(--ok)':'var(--warn)')+'">'+(chkStato(a).pronta?'✓ Pratica completa':'Pratica '+chkStato(a).f+' / '+chkStato(a).tot)+'</small></div>'+
+      '<div>'+esc(a.corso)+'<small>'+esc(a.fase)+'</small></div>'+
+      '<div><span class="mono" style="font-size:12px;">'+guideTxt+'</span>'+(ob?'<div class="bar"><i style="width:'+pct+'%; color:'+(a.guide>=ob?'var(--ok)':'var(--warn)')+'; background:currentColor"></i></div>':'')+(a.esame?'<small>Esame '+esc((a.esameTipo||'').toLowerCase())+' '+fmtData(a.esame)+'</small>':'')+'</div>'+
+      '<div>'+(d ? pillScad(d.g)+'<small>'+d.n+'</small>' : '<span class="sm">Nessun documento a scadenza</span>')+'</div></div>';
+  }).join('') || EMPTY('Nessun allievo.');
+}
+
+function renderAgenda(){
+  const oggi = giorniDa(isoFromOffset(0));
+  const l = guide.slice().sort((a,b)=> (a.data+a.ora) < (b.data+b.ora) ? -1 : 1);
+  let html = '', last = '';
+  l.forEach(g => {
+    if (g.data !== last) {
+      last = g.data;
+      const d = giorniDa(g.data);
+      const p = g.data.split('-').map(Number);
+      const gs = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'][new Date(p[0],p[1]-1,p[2]).getDay()];
+      html += '<div class="day-head">'+(d===0?'Oggi':(d===1?'Domani':(d<0?'Passata · '+gs:gs)))+' · '+fmtData(g.data)+'</div>';
+    }
+    html += guidaRow(g,false);
+  });
+  document.getElementById('agendaList').innerHTML = html || EMPTY('Nessuna guida in agenda.');
+}
+
+function prossimaMezzo(m){
+  const l = MEZZO_SCAD.filter(s=>m[s.f]).map(s=>({tipo:s.tipo, scad:m[s.f], g:giorniDa(m[s.f])})).sort((a,b)=>a.g-b.g);
+  return l[0];
+}
+function renderMezzi(){
+  document.getElementById('mezziTable').innerHTML = mezzi.map(m => {
+    const p = prossimaMezzo(m);
+    return '<div class="row clickable" data-src="mezzo" data-id="'+m.id+'">'+
+      '<div><strong class="mono">'+esc(m.targa)+'</strong><small>'+esc(m.modello)+'</small></div>'+
+      '<div>'+esc(m.tipo)+'<small><span class="pill" style="'+pillStyle[m.stato]+'">'+esc(m.stato)+'</span></small></div>'+
+      '<div>'+(p?esc(p.tipo)+'<small class="mono">'+fmtData(p.scad)+'</small>':'—')+'</div>'+
+      '<div>'+(p?pillScad(p.g):'')+'</div></div>';
+  }).join('') || EMPTY('Nessun mezzo.');
+}
+
+function renderIstruttori(){
+  document.getElementById('istrTable').innerHTML = istruttori.map(i =>
+    '<div class="row clickable" data-src="istruttore" data-id="'+i.id+'">'+
+    '<div><strong>'+esc(i.nome)+'</strong></div>'+
+    '<div>'+esc(i.ruolo)+'<small>Patenti: '+esc(i.patente)+'</small></div>'+
+    '<div>'+pillScad(giorniDa(i.scadPat))+'<small class="mono">'+fmtData(i.scadPat)+'</small></div>'+
+    '<div>'+(i.cqc ? pillScad(giorniDa(i.cqc))+'<small class="mono">'+fmtData(i.cqc)+'</small>' : '<span class="sm">Non richiesta</span>')+'</div></div>'
+  ).join('') || EMPTY('Nessun istruttore.');
+}
+
+function renderPratiche(){
+  const l = pratiche.slice().sort((a,b)=>giorniDa(a.scad)-giorniDa(b.scad));
+  document.getElementById('praticheTable').innerHTML = l.map(p =>
+    '<div class="row clickable" data-src="pratica" data-id="'+p.id+'">'+
+    '<div><strong>'+esc(p.nome)+'</strong><small>'+esc(p.tel)+'</small></div>'+
+    '<div>'+esc(p.tipo)+'<small>'+CATS[p.cat].ico+' '+esc(CATS[p.cat].nome)+'</small></div>'+
+    '<div class="mono">'+fmtData(p.scad)+'</div>'+
+    '<div>'+pillScad(giorniDa(p.scad))+'</div></div>'
+  ).join('') || EMPTY('Nessun cliente.');
+}
+
+function eerNome(c){ const e = EER.find(x=>x.v===c); return e ? e.t : ''; }
+function renderRifiuti(){
+  const l = rifScad.slice().sort((a,b)=>giorniDa(a.scad)-giorniDa(b.scad));
+  document.getElementById('rifScadTable').innerHTML = l.map(r =>
+    '<div class="row clickable" data-src="rifiuto" data-id="'+r.id+'"><div><strong>'+esc(r.tipo)+'</strong></div><div>♻️ Rifiuti</div><div class="mono">'+fmtData(r.scad)+'</div><div>'+pillScad(giorniDa(r.scad))+'</div></div>'
+  ).join('') || EMPTY('Nessuna scadenza.');
+  const giac = {};
+  movimenti.forEach(m => { giac[m.eer] = (giac[m.eer]||0) + (m.tipo==='Carico' ? m.kg : -m.kg); });
+  document.getElementById('giacenze').innerHTML = EER.filter(e=>giac[e.v]!==undefined).map(e =>
+    '<div><span class="mono" style="font-size:11px; color:var(--mut);">'+esc(e.v)+'</span><strong>'+Math.max(0,giac[e.v])+' kg</strong>'+esc(e.t)+'</div>'
+  ).join('') || '<span class="sm">Deposito vuoto.</span>';
+  document.getElementById('movTable').innerHTML = movimenti.slice().sort((a,b)=>a.data<b.data?1:-1).map(m =>
+    '<div class="row clickable" data-src="mov" data-id="'+m.id+'"><div class="mono">'+fmtData(m.data)+'</div><div><span class="mono">'+esc(m.eer)+'</span><small>'+esc(eerNome(m.eer))+'</small></div><div><strong>'+m.kg+' kg</strong><small>'+esc(m.tipo)+'</small></div><div class="mono" style="font-size:12px;">'+(m.fir?esc(m.fir):'—')+'</div></div>'
+  ).join('') || EMPTY('Nessun movimento.');
+}
+
+function renderAll(){
+  renderDashboard(); renderScadenzario(); renderAllievi(); renderAgenda();
+  renderMezzi(); renderIstruttori(); renderPratiche(); renderRifiuti(); renderEsami(); updateNotifBadge();
+}
+
+// ============================================================
+// NAVIGAZIONE
+// ============================================================
+const panels = {
+  dashboard:{title:'Dashboard', sub: ()=> CONFIG.citta+' · dati fittizi a scopo dimostrativo'},
+  scadenzario:{title:'Scadenzario', sub: ()=> 'Patenti, CQC, ADR, permessi, fogli rosa, revisioni, manutenzioni e rifiuti in un solo posto'},
+  allievi:{title:'Allievi', sub: ()=> 'Iscritti, fasi del corso, guide ed esami'},
+  esami:{title:'Agenda esami', sub: ()=> 'Date dal Portale dell\'Automobilista e controllo documenti alla data dell\'esame'},
+  agenda:{title:'Agenda guide', sub: ()=> 'Chi guida, con chi e con quale mezzo'},
+  mezzi:{title:'Parco mezzi', sub: ()=> 'Auto doppi comandi, moto, mezzi pesanti e rimorchi'},
+  istruttori:{title:'Istruttori', sub: ()=> 'Abilitazioni, patenti e CQC dello staff'},
+  rinnovi:{title:'Rinnovi clienti', sub: ()=> 'Il bacino di rinnovi da non perdere'},
+  rifiuti:{title:'Rifiuti', sub: ()=> 'Scadenze, giacenze e movimenti dell\'officina interna'},
+};
+function goPanel(key){
+  document.querySelectorAll('.navitem').forEach(i => i.classList.toggle('active', i.dataset.panel===key));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+key).classList.add('active');
+  document.getElementById('pageTitle').textContent = panels[key].title;
+  document.getElementById('pageSub').textContent = panels[key].sub();
+  document.getElementById('content').scrollTop = 0;
+}
+document.querySelectorAll('.navitem').forEach(n => n.addEventListener('click', () => goPanel(n.dataset.panel)));
+document.getElementById('content').addEventListener('click', e => {
+  const go = e.target.closest('[data-go]');
+  if (go) { if (go.dataset.go==='scadenzario') { catFiltro='all'; soloUrg = go.classList.contains('tile'); renderScadenzario(); } goPanel(go.dataset.go); return; }
+  const cc = e.target.closest('.cat-card');
+  if (cc) { catFiltro = cc.dataset.cat; soloUrg = false; renderScadenzario(); goPanel('scadenzario'); return; }
+  const ch = e.target.closest('[data-chip]');
+  if (ch) { catFiltro = ch.dataset.chip; renderScadenzario(); return; }
+  const row = e.target.closest('.row[data-src]');
+  if (row) OPEN[row.dataset.src](row.dataset.id);
+});
+document.getElementById('btnSoloUrg').addEventListener('click', () => { soloUrg = !soloUrg; renderScadenzario(); });
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window.__tt); window.__tt = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ============================================================
+// MODALE GENERICO
+// ============================================================
+const fBd = document.getElementById('modalForm');
+let fCtx = null;
+function openForm(ctx){
+  fCtx = ctx;
+  document.getElementById('fTitolo').textContent = ctx.title;
+  document.getElementById('fBody').innerHTML = ctx.fields.map((f,i) => {
+    const t = f.type || 'text';
+    let inp;
+    if (t==='select') {
+      // selettore fatto in casa: niente menu nativo del browser, che in alcune anteprime si richiude da solo
+      const os = f.opts.map(o => ({v: String(typeof o==='object' ? o.v : o), t: (typeof o==='object' ? o.t : o) || '—'}));
+      const cur = os.find(o => o.v===String(f.v==null?'':f.v)) || os[0] || {v:'', t:'—'};
+      inp = '<input type="hidden" data-i="'+i+'" value="'+esc(cur.v)+'"><div class="cs-wrap">'+
+        '<button type="button" class="cs-btn" data-cs="'+i+'" aria-haspopup="listbox" aria-expanded="false"><span>'+esc(cur.t)+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'+
+        '<div class="cs-list" data-csl="'+i+'" role="listbox" hidden>'+os.map(o => '<button type="button" role="option" class="cs-opt'+(o.v===cur.v?' on':'')+'" aria-selected="'+(o.v===cur.v)+'" data-csi="'+i+'" data-v="'+esc(o.v)+'">'+esc(o.t)+'</button>').join('')+'</div></div>';
+    } else {
+      inp = '<input data-i="'+i+'" type="'+t+'" value="'+esc(f.v)+'"'+(f.ph?' placeholder="'+esc(f.ph)+'"':'')+(t==='number'?' inputmode="decimal" step="any" min="0"':'')+'>';
+    }
+    return '<div class="field"><label>'+esc(f.label)+(f.req?' *':'')+'</label>'+inp+(f.hint?'<small class="fhint">'+esc(f.hint)+'</small>':'')+'</div>';
+  }).join('');
+  document.getElementById('fElimina').style.display = ctx.onDelete ? '' : 'none';
+  fBd.classList.add('open');
+}
+document.getElementById('fSalva').addEventListener('click', () => {
+  const v = {}; let miss = null;
+  fCtx.fields.forEach((f,i) => {
+    let x = fBd.querySelector('[data-i="'+i+'"]').value;
+    x = typeof x==='string' ? x.trim() : x;
+    if (f.type==='number') x = Math.max(0, parseFloat(x)||0);
+    if (f.req && (x==='' || x==null)) miss = miss || f.label;
+    v[f.k] = x;
+  });
+  if (miss) { showToast('Compila: '+miss); return; }
+  const msg = fCtx.onSave(v);
+  if (msg === false) return;
+  fBd.classList.remove('open'); renderAll();
+  if (msg) showToast(msg);
+});
+document.getElementById('fElimina').addEventListener('click', () => {
+  const msg = fCtx.onDelete();
+  if (msg === false) return;
+  fBd.classList.remove('open'); renderAll();
+  if (msg) showToast(msg);
+});
+document.getElementById('fAnnulla').addEventListener('click', () => fBd.classList.remove('open'));
+fBd.addEventListener('click', e => {
+  if (e.target===fBd) { fBd.classList.remove('open'); return; }
+  if (!e.target.closest('.cs-wrap')) { fBd.querySelectorAll('.cs-list').forEach(x => { x.hidden = true; }); fBd.querySelectorAll('.cs-btn').forEach(x => x.setAttribute('aria-expanded','false')); }
+  const btn = e.target.closest('.cs-btn');
+  if (btn) {
+    const l = fBd.querySelector('[data-csl="'+btn.dataset.cs+'"]'), apri = l.hidden;
+    fBd.querySelectorAll('.cs-list').forEach(x => { x.hidden = true; });
+    fBd.querySelectorAll('.cs-btn').forEach(x => x.setAttribute('aria-expanded','false'));
+    l.hidden = !apri; btn.setAttribute('aria-expanded', String(apri));
+    if (apri) { const on = l.querySelector('.cs-opt.on'); if (on) on.scrollIntoView({block:'nearest'}); }
+    return;
+  }
+  const opt = e.target.closest('.cs-opt');
+  if (opt) {
+    const i = opt.dataset.csi, l = opt.parentNode;
+    fBd.querySelector('input[data-i="'+i+'"]').value = opt.dataset.v;
+    const b = fBd.querySelector('.cs-btn[data-cs="'+i+'"]');
+    b.querySelector('span').textContent = opt.textContent; b.setAttribute('aria-expanded','false');
+    l.querySelectorAll('.cs-opt').forEach(x => { x.classList.toggle('on', x===opt); x.setAttribute('aria-selected', String(x===opt)); });
+    l.hidden = true;
+  }
+});
+const nuovoId = p => p + Date.now().toString(36);
+
+// ============================================================
+// EDITOR DELLE ENTITÀ
+// ============================================================
+function openMezzo(id){
+  const m = id ? mezzi.find(x=>x.id===id) : {targa:'', modello:'', tipo:'Auto doppi comandi', stato:'Disponibile', revisione:'', prerevisione:'', scarrabile:'', manutenzione:'', tachigrafo:'', assicurazione:'', bollo:''};
+  openForm({
+    title: id ? 'Modifica mezzo' : 'Nuovo mezzo',
+    fields: [
+      {k:'targa', label:'Targa', v:m.targa, req:1},
+      {k:'modello', label:'Modello', v:m.modello, req:1},
+      {k:'tipo', label:'Tipo', type:'select', opts:TIPI_MEZZO, v:m.tipo},
+      {k:'stato', label:'Stato', type:'select', opts:STATI_MEZZO, v:m.stato},
+    ].concat(MEZZO_SCAD.map(s => ({k:s.f, label:s.label, type:'date', v:m[s.f], hint: s.f==='scarrabile' ? 'Solo mezzi con gancio scarrabile · periodicità da confermare' : (s.f==='prerevisione'||s.f==='tachigrafo' ? 'Lascia vuoto se non serve' : '')}))),
+    onSave: v => { v.targa = v.targa.toUpperCase(); if (id) Object.assign(m, v); else mezzi.push(Object.assign({id:nuovoId('m')}, v)); return 'Mezzo salvato: '+v.targa; },
+    onDelete: id ? () => { if (!confirm('Eliminare '+m.targa+'?')) return false; mezzi = mezzi.filter(x=>x.id!==id); guide.forEach(g=>{ if (g.mid===id) g.mid=''; }); return 'Mezzo eliminato'; } : null
+  });
+}
+function openAllievo(id){
+  const a = id ? allievi.find(x=>x.id===id) : {nome:'', tel:'', corso:'B', fase:'Teoria', guide:0, foglio:'', permesso:'', esame:'', esameTipo:''};
+  openForm({
+    title: id ? 'Modifica allievo' : 'Nuovo allievo',
+    fields: [
+      {k:'nome', label:'Nome e cognome', v:a.nome, req:1},
+      {k:'tel', label:'Telefono (WhatsApp)', type:'tel', v:a.tel},
+      {k:'corso', label:'Corso', type:'select', opts:CORSI, v:a.corso},
+      {k:'fase', label:'Fase', type:'select', opts:FASI, v:a.fase},
+      {k:'guide', label:'Guide svolte', type:'number', v:a.guide},
+      {k:'foglio', label:'Scadenza foglio rosa', type:'date', v:a.foglio, hint:'Vuoto se non ancora rilasciato'},
+      {k:'permesso', label:'Scadenza permesso di soggiorno', type:'date', v:a.permesso, hint:'Solo per allievi extra UE'},
+      {k:'esame', label:'Data esame', type:'date', v:a.esame},
+      {k:'esameTipo', label:'Tipo esame', type:'select', opts:['','Teoria','Pratica','CQC','ADR'], v:a.esameTipo},
+    ],
+    onSave: v => { if (id) Object.assign(a, v); else allievi.push(Object.assign({id:nuovoId('a'), chk:{}, cf:'CF-DEMO-'+String(allievi.length+1).padStart(4,'0')}, v)); return 'Allievo salvato: '+v.nome; },
+    onDelete: id ? () => { if (!confirm('Eliminare '+a.nome+' e le sue guide?')) return false; allievi = allievi.filter(x=>x.id!==id); guide = guide.filter(g=>g.aid!==id); return 'Allievo eliminato'; } : null
+  });
+}
+function openIstruttore(id){
+  const i = id ? istruttori.find(x=>x.id===id) : {nome:'', ruolo:RUOLI[0], patente:'B', scadPat:'', cqc:''};
+  openForm({
+    title: id ? 'Modifica istruttore' : 'Nuovo istruttore',
+    fields: [
+      {k:'nome', label:'Nome', v:i.nome, req:1},
+      {k:'ruolo', label:'Ruolo', type:'select', opts:RUOLI, v:i.ruolo},
+      {k:'patente', label:'Categorie di patente', v:i.patente, ph:'es. A B C D E'},
+      {k:'scadPat', label:'Scadenza patente', type:'date', v:i.scadPat, req:1},
+      {k:'cqc', label:'Scadenza CQC', type:'date', v:i.cqc, hint:'Vuoto se non la possiede'},
+    ],
+    onSave: v => { v.patente = v.patente.toUpperCase(); if (id) Object.assign(i, v); else istruttori.push(Object.assign({id:nuovoId('i')}, v)); return 'Salvato: '+v.nome; },
+    onDelete: id ? () => { if (!confirm('Eliminare '+i.nome+'?')) return false; istruttori = istruttori.filter(x=>x.id!==id); guide.forEach(g=>{ if (g.iid===id) g.iid=''; }); return 'Eliminato'; } : null
+  });
+}
+function openPratica(id){
+  const p = id ? pratiche.find(x=>x.id===id) : {nome:'', tel:'', cat:'patente', tipo:'Patente B', scad:''};
+  openForm({
+    title: id ? 'Modifica rinnovo' : 'Nuovo cliente da rinnovare',
+    fields: [
+      {k:'nome', label:'Cliente', v:p.nome, req:1},
+      {k:'tel', label:'Telefono (WhatsApp)', type:'tel', v:p.tel},
+      {k:'cat', label:'Categoria', type:'select', opts:CAT_PRATICA, v:p.cat},
+      {k:'tipo', label:'Documento', v:p.tipo, ph:'es. Patente C, CQC merci, ADR cisterne', req:1},
+      {k:'scad', label:'Scadenza', type:'date', v:p.scad, req:1},
+    ],
+    onSave: v => { if (id) Object.assign(p, v); else pratiche.push(Object.assign({id:nuovoId('c')}, v)); return 'Salvato: '+v.nome; },
+    onDelete: id ? () => { if (!confirm('Eliminare '+p.nome+'?')) return false; pratiche = pratiche.filter(x=>x.id!==id); return 'Eliminato'; } : null
+  });
+}
+function openRifScad(id){
+  const r = id ? rifScad.find(x=>x.id===id) : {tipo:'', scad:''};
+  openForm({
+    title: id ? 'Modifica adempimento' : 'Nuovo adempimento rifiuti',
+    fields: [
+      {k:'tipo', label:'Adempimento', v:r.tipo, req:1, ph:'es. Ritiro batterie esauste'},
+      {k:'scad', label:'Scadenza', type:'date', v:r.scad, req:1},
+    ],
+    onSave: v => { if (id) Object.assign(r, v); else rifScad.push(Object.assign({id:nuovoId('r')}, v)); return 'Adempimento salvato'; },
+    onDelete: id ? () => { if (!confirm('Eliminare questo adempimento?')) return false; rifScad = rifScad.filter(x=>x.id!==id); return 'Eliminato'; } : null
+  });
+}
+function openMov(id){
+  const m = id ? movimenti.find(x=>x.id===id) : {data:isoFromOffset(0), eer:EER[0].v, tipo:'Carico', kg:'', fir:''};
+  openForm({
+    title: id ? 'Modifica movimento' : 'Nuovo movimento',
+    fields: [
+      {k:'data', label:'Data', type:'date', v:m.data, req:1},
+      {k:'eer', label:'Rifiuto (codice EER)', type:'select', opts:EER.map(e=>({v:e.v, t:e.v+' · '+e.t})), v:m.eer},
+      {k:'tipo', label:'Movimento', type:'select', opts:['Carico','Scarico'], v:m.tipo},
+      {k:'kg', label:'Quantità (kg)', type:'number', v:m.kg, req:1},
+      {k:'fir', label:'Numero formulario (FIR)', v:m.fir, hint:'Solo per gli scarichi verso lo smaltitore'},
+    ],
+    onSave: v => { if (id) Object.assign(m, v); else movimenti.push(Object.assign({id:nuovoId('mv')}, v)); return 'Movimento registrato'; },
+    onDelete: id ? () => { if (!confirm('Eliminare il movimento?')) return false; movimenti = movimenti.filter(x=>x.id!==id); return 'Movimento eliminato'; } : null
+  });
+}
+function openGuida(id){
+  const g = id ? guide.find(x=>x.id===id) : {data:isoFromOffset(0), ora:'09:00', aid:allievi[0]?allievi[0].id:'', iid:istruttori[0]?istruttori[0].id:'', mid:mezzi[0]?mezzi[0].id:'', tipo:'Urbana'};
+  openForm({
+    title: id ? 'Modifica guida' : 'Nuova guida',
+    fields: [
+      {k:'data', label:'Data', type:'date', v:g.data, req:1},
+      {k:'ora', label:'Ora', type:'time', v:g.ora, req:1},
+      {k:'aid', label:'Allievo', type:'select', opts:allievi.map(a=>({v:a.id, t:a.nome+' · '+a.corso})), v:g.aid},
+      {k:'iid', label:'Istruttore', type:'select', opts:[{v:'',t:'— nessuno —'}].concat(istruttori.map(i=>({v:i.id, t:i.nome}))), v:g.iid},
+      {k:'mid', label:'Mezzo', type:'select', opts:[{v:'',t:'— nessuno —'}].concat(mezzi.map(m=>({v:m.id, t:m.targa+' · '+m.modello}))), v:g.mid},
+      {k:'tipo', label:'Tipo di guida', type:'select', opts:TIPI_GUIDA, v:g.tipo},
+    ],
+    onSave: v => {
+      if (!v.aid) { showToast('Aggiungi prima un allievo'); return false; }
+      let gg;
+      if (id) { Object.assign(g, v); gg = g; } else { gg = Object.assign({id:nuovoId('g')}, v); guide.push(gg); }
+      const w = warnGuida(gg);
+      return w.length ? 'Guida salvata · ⚠ '+w.join(', ') : 'Guida salvata · tutto in regola';
+    },
+    onDelete: id ? () => { if (!confirm('Eliminare la guida?')) return false; guide = guide.filter(x=>x.id!==id); return 'Guida eliminata'; } : null
+  });
+}
+const OPEN = {mezzo:openMezzo, allievo:id=>openScheda(id), istruttore:openIstruttore, pratica:openPratica, rifiuto:openRifScad, mov:openMov, guida:openGuida};
+document.getElementById('btnNuovaGuida').addEventListener('click', () => openGuida(null));
+document.getElementById('btnNuovaGuida2').addEventListener('click', () => openGuida(null));
+document.getElementById('btnNuovoAllievo').addEventListener('click', () => openAllievo(null));
+document.getElementById('btnNuovoMezzo').addEventListener('click', () => openMezzo(null));
+document.getElementById('btnNuovoIstr').addEventListener('click', () => openIstruttore(null));
+document.getElementById('btnNuovaPratica').addEventListener('click', () => openPratica(null));
+document.getElementById('btnNuovaRifScad').addEventListener('click', () => openRifScad(null));
+document.getElementById('btnNuovoMov').addEventListener('click', () => openMov(null));
+
+// ============================================================
+// PRATICA ALLIEVO · CHECKLIST · PACCHETTO MOTORIZZAZIONE · ESAMI
+// ============================================================
+const CHECK = [
+  {k:'doc',    t:"Documento d'identità",  d:'Copia fronte e retro, in corso di validità'},
+  {k:'cf',     t:'Codice fiscale',         d:'Tessera sanitaria o certificato'},
+  {k:'medico', t:'Certificato medico',     d:'Rilasciato dal medico abilitato'},
+  {k:'foto',   t:'Foto tessera',           d:'Acquisita in digitale'},
+  {k:'firma',  t:'Firma digitalizzata',    d:'Acquisita su tavoletta o da scansione'},
+  {k:'vers',   t:'Versamenti PagoPA',      d:'Ricevute dei pagamenti per la pratica'},
+  {k:'perm',   t:'Permesso di soggiorno',  d:'Solo per allievi extra UE', solo:a=>!!a.permesso},
+];
+function chkItems(a){ return CHECK.filter(c=>!c.solo || c.solo(a)); }
+function chkOk(a,c){ if (c.k==='perm' && a.permesso && giorniDa(a.permesso)<0) return false; return !!(a.chk && a.chk[c.k]); }
+function chkStato(a){ const l = chkItems(a), f = l.filter(c=>chkOk(a,c)).length; return {f, tot:l.length, pronta:f===l.length}; }
+function warnEsame(a){
+  const w = []; if (!a.esame) return w;
+  const dE = giorniDa(a.esame), pratica = a.esameTipo==='Pratica';
+  if (pratica && !a.foglio) w.push('foglio rosa mancante');
+  else if (pratica && giorniDa(a.foglio) < dE) w.push('foglio rosa scade prima dell\'esame');
+  if (a.permesso && giorniDa(a.permesso) < dE) w.push('permesso di soggiorno scade prima dell\'esame');
+  const ob = GUIDE_OBBL[a.corso];
+  if (pratica && ob && a.guide < ob) { const m = ob-a.guide; w.push(m===1 ? 'manca 1 guida obbligatoria' : 'mancano '+m+' guide obbligatorie'); }
+  const c = chkStato(a), m = c.tot-c.f;
+  if (m) w.push('pratica incompleta ('+m+' document'+(m>1?'i':'o')+')');
+  return w;
+}
+function pillWarn(w){
+  return w.length
+    ? '<span class="pill" style="--pc:var(--ko)">⚠ '+w.length+' problem'+(w.length>1?'i':'a')+'</span><span class="warn">'+esc(w.join(' · '))+'</span>'
+    : '<span class="pill" style="--pc:var(--ok)">Pronto per l\'esame</span>';
+}
+
+// ---------- scheda allievo ----------
+const schBd = document.getElementById('modalScheda');
+let schId = null;
+function openScheda(id){ schId = id; renderScheda(); schBd.classList.add('open'); }
+function renderScheda(){
+  const a = allievi.find(x=>x.id===schId);
+  if (!a) { schBd.classList.remove('open'); return; }
+  a.chk = a.chk || {};
+  const c = chkStato(a), pct = Math.round(c.f/c.tot*100), ob = GUIDE_OBBL[a.corso];
+  document.getElementById('schTitolo').textContent = a.nome;
+  document.getElementById('schBody').innerHTML =
+    '<div class="sch-head"><div><span class="sm">Corso</span><b>'+esc(a.corso)+'</b></div><div><span class="sm">Fase</span><b>'+esc(a.fase)+'</b></div><div><span class="sm">Guide</span><b>'+a.guide+(ob?' / '+ob:'')+'</b></div><div><span class="sm">Esame</span><b>'+(a.esame?fmtData(a.esame):'—')+'</b></div></div>'+
+    '<div class="ck-prog"><div class="ulbl"><span>Checklist pratica</span><span class="'+(c.pronta?'okc':'koc')+'">'+(c.pronta?'✓ Pratica pronta':c.f+' / '+c.tot+' documenti')+'</span></div>'+
+    '<div class="bar big"><i style="width:'+pct+'%; color:'+(c.pronta?'var(--ok)':'var(--acc)')+'; background:'+(c.pronta?'currentColor':'var(--grad)')+'"></i></div></div>'+
+    chkItems(a).map(it => {
+      const ok = chkOk(a,it), scad = it.k==='perm' && giorniDa(a.permesso)<0;
+      return '<label class="ck'+(ok?' on':'')+(scad?' bad':'')+'"><span class="sw"><input type="checkbox" data-ck="'+it.k+'"'+(a.chk[it.k]?' checked':'')+'><i></i></span>'+
+        '<span class="grow"><b>'+esc(it.t)+'</b><small>'+(scad?'<span style="color:var(--ko)">Scaduto il '+fmtData(a.permesso)+' · serve il rinnovo</span>':esc(it.d))+'</small></span></label>';
+    }).join('')+
+    (a.esame && giorniDa(a.esame)>=0 ? '<div class="ck-esame"><div class="ulbl"><span>Controllo per l\'esame del '+fmtData(a.esame)+'</span></div>'+pillWarn(warnEsame(a))+'</div>' : '');
+}
+schBd.addEventListener('change', e => {
+  const k = e.target.dataset && e.target.dataset.ck; if (!k) return;
+  const a = allievi.find(x=>x.id===schId); a.chk[k] = e.target.checked;
+  renderScheda(); renderAll();
+  if (chkStato(a).pronta && e.target.checked) showToast('Pratica di '+a.nome+' completa ✓');
+});
+document.getElementById('schChiudi').addEventListener('click', () => schBd.classList.remove('open'));
+document.getElementById('schModifica').addEventListener('click', () => { schBd.classList.remove('open'); openAllievo(schId); });
+document.getElementById('schPack').addEventListener('click', () => { schBd.classList.remove('open'); openPack(schId); });
+schBd.addEventListener('click', e => { if (e.target===schBd) schBd.classList.remove('open'); });
+
+// ---------- pacchetto motorizzazione ----------
+const PACK = [
+  {k:'foto',   f:'foto-tessera.jpg',       t:'Foto tessera'},
+  {k:'firma',  f:'firma.jpg',              t:'Firma digitalizzata'},
+  {k:'doc',    f:'documento-identita.pdf', t:"Documento d'identità"},
+  {k:'cf',     f:'codice-fiscale.pdf',     t:'Codice fiscale'},
+  {k:'medico', f:'certificato-medico.pdf', t:'Certificato medico'},
+  {k:'vers',   f:'ricevute-pagopa.pdf',    t:'Ricevute versamenti PagoPA'},
+  {k:'perm',   f:'permesso-soggiorno.pdf', t:'Permesso di soggiorno', solo:a=>!!a.permesso},
+];
+const packBd = document.getElementById('modalPack');
+let packId = null;
+function slug(n){ return n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+function cartella(a){ return slug(a.nome)+'_'+slug(a.corso); }
+function datiPack(a){
+  return [['Allievo',a.nome],['Codice fiscale',a.cf||'—'],['Telefono',a.tel||'—'],['Corso / categoria',a.corso],['Fase',a.fase],
+    ['Foglio rosa', a.foglio?'scade il '+fmtData(a.foglio):'non ancora rilasciato'],
+    ['Permesso di soggiorno', a.permesso?'scade il '+fmtData(a.permesso):'non richiesto'],
+    ['Esame', a.esame?(a.esameTipo||'')+' il '+fmtData(a.esame):'non prenotato'],
+    ['Guide svolte', String(a.guide)]];
+}
+function openPack(id){ packId = id; renderPack(); packBd.classList.add('open'); }
+function renderPack(){
+  const a = allievi.find(x=>x.id===packId); if (!a) return;
+  const items = PACK.filter(p=>!p.solo || p.solo(a)), cart = cartella(a);
+  const nOk = items.filter(p=>chkOk(a,{k:p.k})).length;
+  document.getElementById('packTitolo').textContent = 'Pacchetto Motorizzazione';
+  document.getElementById('packBody').innerHTML =
+    '<div class="pk-folder"><span>📁</span><div class="grow"><b class="mono">'+esc(cart)+'/</b><small>'+esc(a.nome)+' · '+nOk+' di '+items.length+' file pronti</small></div>'+
+    (nOk===items.length?'<span class="pill" style="--pc:var(--ok)">Completo</span>':'<span class="pill" style="--pc:var(--warn)">Incompleto</span>')+'</div>'+
+    items.map(p => {
+      const ok = chkOk(a,{k:p.k});
+      return '<div class="pk'+(ok?' ok':'')+'"><span class="pk-ico">'+(ok?'✓':'!')+'</span><div class="grow"><span class="mono">'+esc(p.f)+'</span><small>'+esc(p.t)+(ok?'':' · manca: spuntalo nella checklist quando lo ricevi')+'</small></div></div>';
+    }).join('')+
+    '<div class="ulbl" style="margin-top:18px"><span>Dati da inserire sul portale</span></div>'+
+    '<div class="pk-dati">'+datiPack(a).map(r=>'<div><span class="sm">'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('')+'</div>'+
+    '<div class="ulbl" style="margin-top:18px"><span>Cosa fare sul portale</span></div>'+
+    '<ol class="pk-steps"><li>Apri il Portale dell\'Automobilista con l\'accesso dell\'autoscuola.</li><li>Inserisci i dati qui sopra: col tasto <b>Copia dati</b> li hai già pronti da incollare.</li><li>Carica i file della cartella <span class="mono">'+esc(cart)+'/</span>.</li><li>Quando il portale conferma la data d\'esame, importala in <b>Agenda esami</b>.</li></ol>'+
+    '<div class="msg-note">Demo: i file non sono reali. Nel gestionale definitivo la cartella si scarica in ZIP con i nomi già pronti.</div>';
+}
+function copiaTesto(t){
+  const ok = () => showToast('Dati copiati: incollali sul portale');
+  const fallback = () => {
+    const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); ok(); } catch(e) { showToast('Copia non riuscita'); }
+    ta.remove();
+  };
+  try { navigator.clipboard.writeText(t).then(ok, fallback); } catch(e) { fallback(); }
+}
+document.getElementById('packCopia').addEventListener('click', () => {
+  const a = allievi.find(x=>x.id===packId); if (a) copiaTesto(datiPack(a).map(r=>r[0]+': '+r[1]).join('\n'));
+});
+document.getElementById('packScarica').addEventListener('click', () => {
+  const a = allievi.find(x=>x.id===packId); if (!a) return;
+  const items = PACK.filter(p=>!p.solo || p.solo(a));
+  const txt = 'PACCHETTO MOTORIZZAZIONE — '+CONFIG.nome+'\n\n'+datiPack(a).map(r=>r[0]+': '+r[1]).join('\n')+
+    '\n\nFile della cartella '+cartella(a)+'/\n'+items.map(p=>(chkOk(a,{k:p.k})?'[OK] ':'[MANCA] ')+p.f+' — '+p.t).join('\n')+'\n';
+  try {
+    const url = URL.createObjectURL(new Blob([txt], {type:'text/plain'}));
+    const l = document.createElement('a'); l.href = url; l.download = cartella(a)+'_riepilogo.txt'; document.body.appendChild(l); l.click(); l.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    showToast('Riepilogo scaricato');
+  } catch(e) { showToast('Download non riuscito'); }
+});
+document.getElementById('packChiudi').addEventListener('click', () => packBd.classList.remove('open'));
+packBd.addEventListener('click', e => { if (e.target===packBd) packBd.classList.remove('open'); });
+
+// ---------- agenda esami ----------
+function esamiOrd(){ return allievi.filter(a=>a.esame && giorniDa(a.esame)>=0).sort((a,b)=>giorniDa(a.esame)-giorniDa(b.esame)); }
+function esameRow(a){
+  const g = giorniDa(a.esame);
+  return '<div class="row clickable" data-src="allievo" data-id="'+a.id+'">'+
+    '<div><strong>'+esc(a.nome)+'</strong><small>'+esc(a.corso)+' · '+esc(a.fase)+'</small></div>'+
+    '<div>Esame '+esc((a.esameTipo||'').toLowerCase())+'<small>'+(g===0?'Oggi':(g===1?'Domani':'Tra '+g+' gg'))+'</small></div>'+
+    '<div class="mono">'+fmtData(a.esame)+'</div>'+
+    '<div>'+pillWarn(warnEsame(a))+'</div></div>';
+}
+function renderEsami(){
+  document.getElementById('esamiTable').innerHTML = esamiOrd().map(esameRow).join('') || EMPTY('Nessun esame prenotato. Importa le date dal portale.');
+}
+const impBd = document.getElementById('modalImp');
+const TIPI_ESAME = ['Teoria','Pratica','CQC','ADR'];
+function norm(x){ return slug(String(x||'')).replace(/-/g,''); }
+function parseImport(txt){
+  return txt.split(/\n+/).map(r=>r.trim()).filter(Boolean).map(r => {
+    const p = r.split(/[;\t|]/).map(x=>x.trim());
+    const m = (p[1]||'').match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+    const iso = m ? m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0') : '';
+    const tipo = TIPI_ESAME.find(t=>t.toLowerCase()===(p[2]||'').toLowerCase()) || '';
+    const n = norm(p[0]);
+    const a = n ? allievi.find(x => norm(x.nome)===n || norm(x.nome).startsWith(n) || n.startsWith(norm(x.nome))) : null;
+    return {riga:r, nome:p[0]||'', iso, tipo, a, ok: !!(a && iso && tipo)};
+  });
+}
+function renderImpPrev(){
+  const l = parseImport(document.getElementById('impTxt').value);
+  document.getElementById('impPrev').innerHTML = l.map(x =>
+    '<div class="imp-row">'+(x.ok?'<span class="pill" style="--pc:var(--ok)">OK</span>':'<span class="pill" style="--pc:var(--ko)">'+(!x.a?'Allievo non trovato':(!x.iso?'Data non valida':'Tipo non valido'))+'</span>')+
+    '<span class="grow">'+esc(x.a?x.a.nome:x.nome)+(x.iso?' · '+fmtData(x.iso):'')+(x.tipo?' · '+x.tipo:'')+'</span></div>').join('');
+}
+function esempioImport(){
+  const f = g => fmtData(isoFromOffset(g));
+  return 'Sara M.; '+f(20)+'; Pratica\nLuca F.; '+f(25)+'; Pratica\nFatima B.; '+f(14)+'; Teoria\nMario Rossi; '+f(30)+'; Pratica';
+}
+document.getElementById('btnImpEsami').addEventListener('click', () => { document.getElementById('impTxt').value = ''; renderImpPrev(); impBd.classList.add('open'); });
+document.getElementById('impEsempio').addEventListener('click', () => { document.getElementById('impTxt').value = esempioImport(); renderImpPrev(); });
+document.getElementById('impTxt').addEventListener('input', renderImpPrev);
+document.getElementById('impAnnulla').addEventListener('click', () => impBd.classList.remove('open'));
+impBd.addEventListener('click', e => { if (e.target===impBd) impBd.classList.remove('open'); });
+document.getElementById('impOk').addEventListener('click', () => {
+  const l = parseImport(document.getElementById('impTxt').value), ok = l.filter(x=>x.ok);
+  if (!l.length) { showToast('Incolla almeno una riga'); return; }
+  ok.forEach(x => { x.a.esame = x.iso; x.a.esameTipo = x.tipo; if (x.a.fase!=='Patentato') x.a.fase = 'Esame prenotato'; });
+  impBd.classList.remove('open'); renderAll();
+  const ko = l.length - ok.length;
+  const prob = ok.filter(x=>warnEsame(x.a).length).length;
+  showToast(ok.length+' esami importati'+(ko?' · '+ko+(ko===1?' riga scartata':' righe scartate'):'')+(prob?' · '+prob+' con problemi':''));
+});
+document.addEventListener('keydown', e => { if (e.key==='Escape') [schBd, packBd, impBd].forEach(b=>b.classList.remove('open')); });
+
+// ============================================================
+// PROMEMORIA (simulati: WhatsApp / email)
+// ============================================================
+const notifPop = document.getElementById('notifPop');
+const msgBd = document.getElementById('modalMsg');
+let msgCanale = 'wa', msgKey = null;
+function closePops(){ [notifPop, document.getElementById('aspPop')].forEach(p=>{ if (p.classList.contains('open')) p.classList.remove('open'); }); }
+function updateNotifBadge(){ document.getElementById('notifN').textContent = urgenti().filter(x=>!inviati[x.key]).length; }
+function testoGiorni(g){ return g<0 ? 'scaduta da '+Math.abs(g)+' gg' : (g===0 ? 'scade oggi' : 'scade tra '+g+' gg'); }
+function renderNotif(){
+  const list = urgenti();
+  document.getElementById('notifList').innerHTML = list.map(x => {
+    const sent = !!inviati[x.key];
+    return '<div class="notif-row"><span class="pill" style="'+pillStyle[statoScadenza(x.g)]+'">'+(x.g<0?'Scaduta':'In scad.')+'</span>'+
+      '<div class="grow"><strong>'+esc(x.tipo)+'</strong> · '+esc(x.soggetto)+'<small>'+testoGiorni(x.g)+' · '+fmtData(x.scad)+'</small></div>'+
+      '<button class="btn-mini'+(sent?' done':'')+'" data-key="'+x.key+'">'+(sent?'✓ Inviato':'Invia')+'</button></div>';
+  }).join('') || EMPTY('Nessuna scadenza nei prossimi 30 giorni. 🎉');
+  const n = list.filter(x=>!inviati[x.key]).length;
+  const bt = document.getElementById('notifTutti');
+  bt.textContent = n ? 'Invia tutti i promemoria ('+n+')' : 'Tutti i promemoria inviati ✓';
+  bt.style.opacity = n ? '1' : '.5';
+}
+function corpoMsg(it){
+  const nome = it.soggetto.split(' ')[0], d = fmtData(it.scad);
+  if (it.src==='pratica' && it.cat==='permesso') return 'Ciao '+nome+', ti ricordiamo che il tuo permesso di soggiorno scade il '+d+'. Avvia per tempo il rinnovo: se ti serve una mano con i documenti passa in sede.';
+  if (it.src==='pratica') return 'Ciao '+nome+', ti ricordiamo la scadenza di: '+it.tipo+' ('+d+').\nPossiamo occuparci noi del rinnovo, visita medica compresa. Rispondi a questo messaggio per fissare un appuntamento.';
+  if (it.src==='allievo' && it.cat==='foglio') return 'Ciao '+nome+', il tuo foglio rosa scade il '+d+'. Fissiamo le ultime guide e l\'esame prima della scadenza?';
+  if (it.src==='allievo') return 'Ciao '+nome+', il tuo permesso di soggiorno risulta in scadenza il '+d+'. Portaci una copia del rinnovo (o della ricevuta) per la tua pratica.';
+  if (it.src==='istruttore') return 'Ciao '+nome+', promemoria: '+it.tipo+(it.g<0?' scaduta il '+d+'. Finché non la rinnovi non posso assegnarti guide sui mezzi pesanti.':' in scadenza il '+d+'.');
+  return 'Promemoria: '+it.tipo+' · '+it.soggetto+(it.sub?' ('+it.sub+')':'')+'\n'+testoGiorni(it.g).replace(/^./,c=>c.toUpperCase())+' · '+d;
+}
+function destMsg(it){
+  if (it.src==='pratica' || it.src==='allievo') return {wa:it.contatto, em:it.soggetto.split(' ')[0].toLowerCase()+'@esempio.it', nome:it.soggetto};
+  if (it.src==='istruttore') return {wa:'+39 333 000 0900', em:'staff@esempio.it', nome:it.soggetto};
+  return {wa:'+39 333 000 0999', em:'titolare@esempio.it', nome:'Titolare autoscuola'};
+}
+function renderMsg(){
+  const it = urgenti().find(x=>x.key===msgKey);
+  if (!it) { msgBd.classList.remove('open'); return; }
+  const dst = destMsg(it), corpo = corpoMsg(it);
+  document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on', b.dataset.ch===msgCanale));
+  document.getElementById('msgPreview').innerHTML = msgCanale==='wa'
+    ? '<div class="bubble">🚗 <b>'+esc(CONFIG.nome)+'</b>\n'+esc(corpo)+'</div>'
+    : '<div class="mailbox"><div><b>A:</b> '+esc(dst.em)+'</div><div><b>Oggetto:</b> Promemoria scadenza – '+esc(it.tipo)+'</div><hr><div style="white-space:pre-wrap;">'+esc(corpo)+'\n\n— '+esc(CONFIG.nome)+', '+esc(CONFIG.citta)+'</div></div>';
+  document.getElementById('msgNote').textContent = 'Destinatario: '+dst.nome+' · '+(msgCanale==='wa'?dst.wa:dst.em)+' (dati di esempio). Messaggio simulato.';
+}
+document.getElementById('btnNotif').addEventListener('click', e => { e.stopPropagation(); const o = notifPop.classList.contains('open'); closePops(); if (!o) { renderNotif(); notifPop.classList.add('open'); } });
+notifPop.addEventListener('click', e => {
+  e.stopPropagation();
+  const b = e.target.closest('.btn-mini');
+  if (!b || b.classList.contains('done')) return;
+  msgKey = b.dataset.key; msgCanale = 'wa'; closePops(); renderMsg(); msgBd.classList.add('open');
+});
+document.getElementById('notifTutti').addEventListener('click', () => {
+  const l = urgenti().filter(x=>!inviati[x.key]);
+  if (!l.length) return;
+  l.forEach(x=>{ inviati[x.key]=true; });
+  renderNotif(); updateNotifBadge();
+  showToast(l.length+' promemoria inviati (simulazione)');
+});
+document.querySelector('.seg').addEventListener('click', e => { const b = e.target.closest('button[data-ch]'); if (b) { msgCanale = b.dataset.ch; renderMsg(); } });
+document.getElementById('msgAnnulla').addEventListener('click', () => msgBd.classList.remove('open'));
+msgBd.addEventListener('click', e => { if (e.target===msgBd) msgBd.classList.remove('open'); });
+document.getElementById('msgInvia').addEventListener('click', () => {
+  inviati[msgKey] = true; msgBd.classList.remove('open'); renderNotif(); updateNotifBadge();
+  showToast('Promemoria inviato via '+(msgCanale==='wa'?'WhatsApp':'email')+' (simulazione)');
+});
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('.modal-backdrop, select, input, textarea, label')) return; closePops(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') { closePops(); fBd.classList.remove('open'); msgBd.classList.remove('open'); } });
+
+// ============================================================
+// ASPETTO — stesse palette e temi del gestionale magazzino Pagliani
+// ============================================================
+const PAL = {
+  synth:     { g:'#FF2FA3', n:'Synth',       acc:'#3D5AFE', acc2:'#FF2FA3', acc3:'#FF8A1E', acc4:'#AEB6C2', onAcc:'#fff',    dark:['#06070A','#0d1022'], light:['#F5F7FF','#e2e6f3'] },
+  halloween: { g:'#F25C05', n:'Halloween',   acc:'#F28705', acc2:'#035AA6', acc3:'#F25C05', acc4:'#021F59', onAcc:'#000',    dark:['#000000','#021F59'], light:['#f4f6fb','#dbe4f3'] },
+  cadet:     { g:'#C43A10', n:'Space Cadet', acc:'#F54F1B', acc2:'#E6D5B7', acc3:'#F54F1B', acc4:'#E6D5B7', onAcc:'#fff',    dark:['#1E223D','#12152a'], light:['#F4EDE0','#E6D5B7'] },
+  voltage:   { g:'#FFAA00', n:'Voltage',     acc:'#FF4500', acc2:'#00FF85', acc3:'#FFAA00', acc4:'#FFE600', onAcc:'#0D0500', dark:['#0D0500','#170b03'], light:['#fff8ef','#f2e6d5'] },
+  moderna:   { g:'#068187', n:'Moderna',     acc:'#10BBC3', acc2:'#FEA24F', acc3:'#A60E35', acc4:'#068187', onAcc:'#051A2D', dark:['#051A2D','#073047'], light:['#f1f8f9','#d9ecee'] },
+  petrolio:  { g:'#B8481B', n:'Petrolio',    acc:'#E8622A', acc2:'#4BA8C4', acc3:'#1B5F84', acc4:'#F2E4C8', onAcc:'#fff',    dark:['#14182B','#0E3B54'], light:['#F7F1E4','#F2E4C8'] },
+  turmeric:  { g:'#FF8A1E', n:'Turmeric',    acc:'#FFBE0B', acc2:'#FF8A1E', acc3:'#e0a100', acc4:'#2A2312', onAcc:'#2A2312', dark:['#2A2312','#17130a'], light:['#fff8e3','#f2e4bb'] },
+  // abbinate agli stili
+  liquid:    { g:'#A855F7', n:'Liquid',      acc:'#22D3EE', acc2:'#A855F7', acc3:'#3B82F6', acc4:'#E879F9', onAcc:'#0b0c10', dark:['#0f1013','#191a21'], light:['#f3f5fb','#e4e7f2'], set:'stili' },
+  aethereal: { g:'#2BC4B8', n:'Aethereal',   acc:'#2BC4B8', acc2:'#D9826B', acc3:'#C9A46A', acc4:'#7FA7A8', onAcc:'#06201f', dark:['#0c2228','#123540'], light:['#eef6f5','#d6e9e7'], set:'stili' },
+  // web design guide
+  royal:     { g:'#2563EB', n:'Royal Blue',  acc:'#2563EB', acc2:'#60A5FA', acc3:'#DBEAFE', acc4:'#F1F5F9', onAcc:'#fff',    dark:['#070d1f','#0c1a3d'], light:['#FFFFFF','#DBEAFE'], set:'web' },
+  emerald:   { g:'#10B981', n:'Emerald',     acc:'#10B981', acc2:'#34D399', acc3:'#A7F3D0', acc4:'#ECFDF5', onAcc:'#04291d', dark:['#03140e','#062a1d'], light:['#FFFFFF','#ECFDF5'], set:'web' },
+  arancionavy:{ g:'#F97316', n:'Orange Navy', acc:'#F97316', acc2:'#FDBA74', acc3:'#334155', acc4:'#F8FAFC', onAcc:'#0F172A', dark:['#0F172A','#1b2537'], light:['#F8FAFC','#e9edf3'], set:'web' },
+  viola:     { g:'#EC4899', n:'Purple Pink', acc:'#7C3AED', acc2:'#EC4899', acc3:'#A78BFA', acc4:'#F9A8D4', onAcc:'#fff',    dark:['#0e0718','#1c0d2e'], light:['#FCE7F3','#f3e3fb'], set:'web' },
+  tealdark:  { g:'#2DD4BF', n:'Teal Dark',   acc:'#0D9488', acc2:'#2DD4BF', acc3:'#0F766E', acc4:'#1F2937', onAcc:'#fff',    dark:['#111827','#1F2937'], light:['#f0fbf9','#d8f2ee'], set:'web' },
+  giallo:    { g:'#FACC15', n:'Yellow Gray', acc:'#FACC15', acc2:'#FDE68A', acc3:'#6B7280', acc4:'#F3F4F6', onAcc:'#1F2937', dark:['#111318','#1F2937'], light:['#F3F4F6','#e5e7eb'], set:'web' },
+  rossobianco:{ g:'#EF4444', n:'Red White',  acc:'#EF4444', acc2:'#F87171', acc3:'#FECACA', acc4:'#F3F4F6', onAcc:'#fff',    dark:['#140707','#2a0e0e'], light:['#FFFFFF','#F3F4F6'], set:'web' },
+  blugrigio: { g:'#3B82F6', n:'Blue Gray',   acc:'#3B82F6', acc2:'#93C5FD', acc3:'#DBEAFE', acc4:'#E5E7EB', onAcc:'#fff',    dark:['#0a1120','#141c2c'], light:['#FFFFFF','#E5E7EB'], set:'web' },
+  rosa:      { g:'#F43F5E', n:'Rose Cream',  acc:'#F43F5E', acc2:'#FB7185', acc3:'#FEF3C7', acc4:'#FFF1F2', onAcc:'#fff',    dark:['#1a0a0e','#2a1116'], light:['#FFFBEB','#FFF1F2'], set:'web' },
+  verdenero: { g:'#22C55E', n:'Green Black', acc:'#22C55E', acc2:'#4ADE80', acc3:'#16A34A', acc4:'#1F2937', onAcc:'#0D1117', dark:['#0D1117','#1F2937'], light:['#f0fbf4','#dcf5e5'], set:'web' },
+  // social media
+  modernblue:{ g:'#3B82F6', n:'Modern Blue', acc:'#2563EB', acc2:'#3B82F6', acc3:'#CBD5E1', acc4:'#F8FAFC', onAcc:'#fff',    dark:['#0b1220','#1E293B'], light:['#F8FAFC','#e2e8f0'], set:'social' },
+  pastello:  { g:'#F8BBD0', n:'Soft Pastel', acc:'#F8BBD0', acc2:'#BBDEFB', acc3:'#C8E6C9', acc4:'#E1BEE7', onAcc:'#3b2a40', dark:['#17131c','#231c2b'], light:['#FFF8F5','#f6eaf0'], set:'social' },
+  terra:     { g:'#A67C52', n:'Earthy',      acc:'#A67C52', acc2:'#6B8E23', acc3:'#8D6E63', acc4:'#F5F5DC', onAcc:'#fff',    dark:['#1f1d1a','#3E3E3E'], light:['#F5F5DC','#ece6cc'], set:'social' },
+  luxury:    { g:'#D4AF37', n:'Black Gold',  acc:'#D4AF37', acc2:'#E5E5E5', acc3:'#FFFFFF', acc4:'#2C2C2C', onAcc:'#000',    dark:['#000000','#2C2C2C'], light:['#FFFFFF','#E5E5E5'], set:'social' },
+  vibrante:  { g:'#FF6B35', n:'Vibrant',     acc:'#FF6B35', acc2:'#06D6A0', acc3:'#FFD166', acc4:'#118AB2', onAcc:'#fff',    dark:['#0b1418','#0f2229'], light:['#F8F9FA','#eaf3f5'], set:'social' },
+  mono:      { g:'#9CA3AF', n:'Monochrome',  acc:'#9CA3AF', acc2:'#F9FAFB', acc3:'#374151', acc4:'#FFFFFF', onAcc:'#111827', dark:['#111827','#1b2230'], light:['#F9FAFB','#e5e7eb'], set:'social' }
+};
+const PAL_SET = [['', 'Le tue palette'], ['stili', 'Abbinate agli stili'], ['web', 'Web design'], ['social', 'Social media']];
+const STILI = {
+  neon:      { n:'Neon',         d:'Vetro scuro e accenti luminosi',               pal:'' },
+  glass:     { n:'Liquid Glass', d:'Vetro smerigliato, bordi sfumati, profondità', pal:'liquid' },
+  blueprint: { n:'Blueprint',    d:'Griglia tecnica, cornici e pulsanti a ghiera', pal:'aethereal' },
+  minimal:   { n:'Essenziale',   d:'Piatto, senza effetti: veloce sui PC datati',  pal:'' }
+};
+const UI = { theme:'dark', pal:CONFIG.paletteIniziale, stile:'neon', dens:1, r:14, anim:true, glow:true };
+try { Object.assign(UI, JSON.parse(localStorage.getItem('depotrack-ui-'+CONFIG.id) || '{}')); } catch(e) {}
+if (!PAL[UI.pal]) UI.pal = CONFIG.paletteIniziale;
+if (!STILI[UI.stile]) UI.stile = 'neon';
+const MQ = window.matchMedia('(prefers-color-scheme: dark)');
+const DENS = [1.25, 1, 0.8];
+function applyUI(){
+  const p = PAL[UI.pal] || PAL.synth, h = document.documentElement, st = h.style;
+  const th = UI.theme === 'auto' ? (MQ.matches ? 'dark' : 'light') : UI.theme;
+  h.dataset.theme = th; h.dataset.style = UI.stile;
+  ['acc','acc2','acc3','acc4','onAcc','g'].forEach(k => st.setProperty('--'+k, p[k]));
+  const b = th === 'dark' ? p.dark : p.light;
+  st.setProperty('--bg', b[0]); st.setProperty('--bg2', b[1]);
+  st.setProperty('--r', UI.r+'px'); st.setProperty('--d', UI.dens);
+  h.classList.toggle('noanim', !UI.anim); h.classList.toggle('noglow', !UI.glow);
+  const mt = document.querySelector('meta[name=theme-color]'); if (mt) mt.content = b[0];
+  try { localStorage.setItem('depotrack-ui-'+CONFIG.id, JSON.stringify(UI)); } catch(e) {}
+}
+if (MQ.addEventListener) MQ.addEventListener('change', () => { if (UI.theme === 'auto') applyUI(); });
+function setUI(k, v, live){ UI[k] = v; applyUI(); if (!live) renderAsp(); }
+function renderAsp(){
+  const di = Math.max(0, DENS.indexOf(UI.dens));
+  document.getElementById('aspBody').innerHTML =
+    '<div class="uisec"><div class="ulbl">Stile dell\'interfaccia</div><div class="stg">'+Object.keys(STILI).map(k => '<button class="stc '+(UI.stile===k?'on':'')+'" data-stile="'+k+'"><span class="stp stp-'+k+'"><i></i><b></b><em></em></span><span class="stn">'+STILI[k].n+'</span><small>'+STILI[k].d+'</small></button>').join('')+'</div></div>'+
+    '<div class="uisec"><div class="ulbl">Tema</div><div class="seg">'+[['auto','Auto'],['light','Chiaro'],['dark','Scuro']].map(([k,t]) => '<button class="'+(UI.theme===k?'on':'')+'" data-ui="theme" data-v="'+k+'">'+t+'</button>').join('')+'</div></div>'+
+    '<div class="uisec"><div class="ulbl">Colori</div>'+PAL_SET.map(([g,t]) => '<div class="pgrp">'+t+'</div><div class="dots">'+Object.keys(PAL).filter(k => (PAL[k].set||'')===g).map(k => { const p = PAL[k]; return '<button class="dot '+(UI.pal===k?'on':'')+'" data-ui="pal" data-v="'+k+'" title="'+p.n+'"><i style="background:conic-gradient(from 210deg,'+p.acc+','+p.acc2+','+p.acc3+','+(p.acc4||p.acc)+','+p.acc+');--gl:'+p.acc+'99"></i>'+p.n+'</button>'; }).join('')+'</div>').join('')+'</div>'+
+    '<div class="uisec"><div class="ulbl">Densità</div><input type="range" id="rDens" min="0" max="2" step="1" value="'+di+'" style="--p:'+(di*50)+'%"><div class="rl"><span>Ariosa</span><span>Standard</span><span>Compatta</span></div></div>'+
+    '<div class="uisec"><div class="ulbl">Raggio angoli <span class="sm" id="rv">'+UI.r+'px</span></div><input type="range" id="rRad" min="4" max="24" value="'+UI.r+'" style="--p:'+((UI.r-4)/20*100)+'%"><div class="rl"><span>4</span><span>14</span><span>24</span></div></div>'+
+    '<div class="uisec"><label class="sw"><input type="checkbox" id="cAnim" '+(UI.anim?'checked':'')+'><i></i><span><b>Animazioni fluide</b><br><small>Transizioni e comparse degli elementi</small></span></label></div>'+
+    '<div class="uisec"><label class="sw"><input type="checkbox" id="cGlow" '+(UI.glow?'checked':'')+'><i></i><span><b>Bagliori neon</b><br><small>Glow su accenti, pulsanti e indicatori</small></span></label></div>';
+}
+const aspPop = document.getElementById('aspPop');
+document.getElementById('btnAsp').addEventListener('click', e => { e.stopPropagation(); const o = aspPop.classList.contains('open'); closePops(); if (!o) { renderAsp(); aspPop.classList.add('open'); } });
+aspPop.addEventListener('click', e => {
+  e.stopPropagation();
+  const sb = e.target.closest('[data-stile]');
+  if (sb) { const k = sb.dataset.stile, st = STILI[k]; UI.stile = k; if (st.pal && PAL[st.pal]) UI.pal = st.pal; applyUI(); renderAsp();
+    showToast(st.pal ? 'Stile '+st.n+' con la palette '+PAL[st.pal].n+': i colori li puoi cambiare qui sotto' : 'Stile '+st.n); return; }
+  const b = e.target.closest('[data-ui]');
+  if (b) { setUI(b.dataset.ui, b.dataset.v); if (b.dataset.ui==='pal') showToast('Accento: '+PAL[b.dataset.v].n); }
+});
+aspPop.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id==='rDens') { t.style.setProperty('--p', t.value*50+'%'); setUI('dens', DENS[t.value], 1); }
+  if (t.id==='rRad') { t.style.setProperty('--p', (t.value-4)/20*100+'%'); document.getElementById('rv').textContent = t.value+'px'; setUI('r', +t.value, 1); }
+});
+aspPop.addEventListener('change', e => {
+  if (e.target.id==='cAnim') setUI('anim', e.target.checked, 1);
+  if (e.target.id==='cGlow') setUI('glow', e.target.checked, 1);
+});
+applyUI();
+
+// ============================================================
+// AVVIO
+// ============================================================
+(function applyConfig(){
+  document.title = CONFIG.titolo;
+  document.getElementById('brandNome').textContent = CONFIG.nome;
+  document.getElementById('brandTag').textContent = CONFIG.tagline;
+  document.getElementById('pageSub').textContent = panels.dashboard.sub();
+  const logo = document.getElementById('brandLogo');
+  if (CONFIG.logoUrl) logo.innerHTML = '<img alt="" src="'+CONFIG.logoUrl.replace(/"/g,'&quot;')+'" style="width:100%; height:100%; object-fit:cover;">';
+  else logo.textContent = CONFIG.sigla;
+})();
+renderAll();
+</script>
+</body>
+</html>
