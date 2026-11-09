@@ -4081,8 +4081,10 @@ function inviaContatto(M){
   var ok=function(){M.el.querySelector('.mb').innerHTML='<div class="ctok"><div style="font-size:44px">✅</div><b>Richiesta inviata, grazie '+esc(d.nome.split(' ')[0])+'!</b><span>Ti ricontatto al più presto'+(d.telefono?' al '+esc(d.telefono):'')+'.</span></div>';
     var f=$('.mf',M.el);f.innerHTML='';var c=document.createElement('button');c.className='ibtn pri';c.textContent='Chiudi';c.onclick=M.close;f.appendChild(c)};
   var ko=function(){bt.disabled=false;bt.textContent='Riprova';st.innerHTML='<b style="color:var(--bad)">Invio non riuscito (connessione?).</b> Scrivimi su WhatsApp o chiamami al +39 392 448 2167.'};
-  if(CMB_KEY){var t='🚌 DepoTrack · nuova richiesta demo\n'+d.nome+(d.azienda?' · '+d.azienda:'')+'\n📞 '+(d.telefono||'—')+'\n✉ '+(d.email||'—')+(d.messaggio?'\n📝 '+d.messaggio:'');
-    try{fetch('https://api.callmebot.com/whatsapp.php?phone='+WA_NUM+'&apikey='+encodeURIComponent(CMB_KEY)+'&text='+encodeURIComponent(t),{mode:'no-cors'}).catch(function(){})}catch(e){}}
+  if(CMB_KEY){var t='DepoTrack - nuova richiesta demo\nNome: '+d.nome+(d.azienda?'\nAzienda: '+d.azienda:'')+'\nTelefono: '+(d.telefono||'-')+'\nEmail: '+(d.email||'-')+(d.messaggio?'\nMessaggio: '+d.messaggio:'');
+    var cu='https://api.callmebot.com/whatsapp.php?phone='+WA_NUM+'&text='+encodeURIComponent(t).replace(/%20/g,'+')+'&apikey='+encodeURIComponent(CMB_KEY);
+    /* richiesta semplice come un'immagine: il browser non la blocca e non serve risposta */
+    try{var im=new Image();im.referrerPolicy='no-referrer';im.src=cu}catch(e){}}
   fetch('https://formsubmit.co/ajax/'+MAIL_TO,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body)})
     .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(r.ok&&String(j.success)!=='false')ok();else ko()})}).catch(ko);
 }
