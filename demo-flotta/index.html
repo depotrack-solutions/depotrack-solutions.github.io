@@ -933,6 +933,32 @@ body.px-min .st .dot{background:#0a0c10;box-shadow:none}
 body.px-min .st .tb{border-radius:6px;background:rgba(255,255,255,.45);border-color:rgba(10,12,16,.25);color:#0a0c10}
 body.px-min .st.free{border:1.5px dashed var(--line);background:transparent;box-shadow:none}
 body.px-min .ring{filter:none}
+
+/* ===== MAGAZZINO RICAMBI ===== */
+.mgk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:6px 0 18px}
+.mgk .w{cursor:default}.mgk .mgclk{cursor:pointer}
+.mgk .wv.mgsm{font-size:calc(40px * var(--dsc))}
+.mgbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.mgbar .search{flex:1 1 260px}
+.mga{display:flex;flex-direction:column;gap:6px}
+.mgcod{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:var(--mut)}
+.mgdes{font-weight:700;font-size:15px;line-height:1.25;min-height:2.5em}
+.mgq{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0}
+.mgq>span{display:flex;flex-direction:column;padding:7px 9px;border-radius:12px;background:rgba(128,128,150,.12)}
+.mgq small{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.mgq b{font-family:var(--f-display);font-weight:var(--dw);font-size:calc(26px * var(--dsc));line-height:1.05;letter-spacing:var(--dls)}
+.mgq em{font-style:normal;font-size:11px;color:var(--mut)}
+.mgq .lo{background:color-mix(in srgb,var(--bad) 18%,transparent)}.mgq .lo b{color:var(--bad)}
+.mg2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:start}
+.mg2 .feed{max-width:none}
+.mgcost{display:grid;gap:4px;padding:12px 14px}
+.mgcr{display:grid;grid-template-columns:52px 1fr 92px;gap:10px;align-items:center;padding:7px 6px;border-radius:10px;text-align:left}
+.mgcr:hover{background:rgba(128,128,150,.14)}
+.mgcr b{font-family:var(--f-display);font-weight:var(--dw);font-size:20px}
+.mgcr em{font-style:normal;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.mgbt{height:9px;border-radius:99px;background:rgba(128,128,150,.2);overflow:hidden}.mgbt i{display:block;height:100%;border-radius:99px;background:var(--pre)}
+@media (max-width:900px){.mgk{grid-template-columns:repeat(2,minmax(0,1fr))}.mg2{grid-template-columns:1fr}}
+@media (max-width:560px){.mgbar .ibtn{flex:1 1 calc(33% - 8px);justify-content:center;padding:9px 6px;font-size:13px}.mgk .wv.mgsm{font-size:calc(30px * var(--dsc))}.mgk{gap:10px}}
 </style>
 </head>
 <body class="v3d s-solid">
@@ -944,6 +970,7 @@ body.px-min .ring{filter:none}
     <span class="tab-ind" id="ind"></span>
     <button class="tab on" role="tab" data-v="piazzale">Piazzale</button>
     <button class="tab" role="tab" data-v="flotta">Flotta</button>
+    <button class="tab" role="tab" data-v="magazzino">Magazzino</button>
     <button class="tab" role="tab" data-v="attivita">Attività</button>
   </nav>
   <div class="right">
@@ -994,6 +1021,11 @@ body.px-min .ring{filter:none}
   <div id="banner"></div>
   <div class="chips" id="fchips" style="margin-bottom:14px"></div>
   <div class="fgrid" id="fgrid"></div>
+</section>
+
+<section class="view" id="v-magazzino">
+  <div class="sh"><h2>Magazzino</h2></div>
+  <div id="mgroot"></div>
 </section>
 
 <section class="view" id="v-attivita">
@@ -1948,12 +1980,13 @@ function openOffWin(){
   if(w){try{w.focus()}catch(e){}}else toast('Il browser ha bloccato la finestra: consenti i popup per questo sito');
 }
 /* ---------- navigazione ---------- */
-var TITLES={piazzale:'Piazzale',flotta:'Flotta',officina:'Officina',attivita:'Attività'};
+var TITLES={magazzino:'Magazzino',piazzale:'Piazzale',flotta:'Flotta',officina:'Officina',attivita:'Attività'};
 function go(v){
   S.view=v;$$('.view').forEach(function(e){e.classList.toggle('on',e.id==='v-'+v)});
   $$('.tab').forEach(function(t){t.classList.toggle('on',t.dataset.v===v)});
   $('#h1').textContent=TITLES[v];moveInd();if(v==='piazzale')setTimeout(fitStage,50);
   if(v==='flotta')renderFlotta();
+  if(v==='magazzino')renderMag();
   document.body.classList.toggle('v-off',v==='officina');if(v==='officina')renderOff();
 }
 function moveInd(){var t=$('.tab.on'),i=$('#ind');if(!t)return;i.style.width=t.offsetWidth+'px';i.style.transform='translateX('+t.offsetLeft+'px)'}
@@ -3578,7 +3611,7 @@ function startLive(){
     clearTimeout(fbTimer);var first=!gotData;gotData=true;demoOn=false;S.live=true;
     ingest(d);TURNI=LT;setLog(LL);
     setStatus('live');render();
-    if(first){wxInit();if(AUTH)AUTH.onAuthStateChanged(onAuth)}
+    if(first){wxInit();startMag();if(AUTH)AUTH.onAuthStateChanged(onAuth)}
   },function(err){loadDemo('accesso al database negato')});
   DB.ref('depotrack_turni').on('value',function(snap){LT=snap.val()||{};if(gotData){TURNI=LT;repaintAll();if(S.sel&&insp.classList.contains('open'))openInsp(S.sel)}},function(){});
   DB.ref('depotrack_log').orderByKey().limitToLast(500).on('value',function(snap){
@@ -3609,6 +3642,185 @@ function setLog(list){
     return {t:fmtTs(e.ts),x:(e.txt||e.type||'')+(e.utente&&(e.txt||'').indexOf(e.utente)<0?' · '+e.utente:''),c:c};
   });
   renderFeed();
+}
+
+/* =====================================================================
+   MAGAZZINO RICAMBI (versione demo, piccola): articoli, giacenze per sede,
+   scorta minima, carico da DDT, scarico su mezzo, trasferimenti, fornitori,
+   richiesta preventivo, lettura barcode, costi ricambi per mezzo
+   ===================================================================== */
+var MAG={art:{},giac:{},mov:{},forn:{}},MQ='',MF='all',MAGSEDI=[['CEN','Magazzino centrale'],['OFF','Magazzino officina']];
+function magSeed(){
+  var T0=Date.now(),D=864e5,H=36e5;
+  var forn={f1:{id:'f1',nome:'Ricambi Lombardi Srl',mail:'ordini@ricambilombardi.demo',tel:'02 5550 1201',note:'Consegna in 24 h'},
+    f2:{id:'f2',nome:'Autoforniture Melegnano',mail:'banco@autoforniture.demo',tel:'02 5550 3340',note:'Ritiro al banco'},
+    f3:{id:'f3',nome:'Lubrificanti Bassi',mail:'vendite@lubrificantibassi.demo',tel:'0371 555 880',note:'Fusti e taniche'},
+    f4:{id:'f4',nome:'BusParts Italia',mail:'ordini@busparts.demo',tel:'035 555 7712',note:'Ricambi originali bus'}};
+  /* codice, descrizione, um, prezzo, fornitore, barcode, [qta CEN, qta OFF], [min CEN, min OFF], ubicazione */
+  var A=[['PF-010','Pastiglie freno ant. pullman','set',58,'f4','8001234500101',[12,3],[6,4],'A-01-2'],
+    ['DF-012','Disco freno ant. Ø 430','pz',96,'f4','8001234500118',[6,2],[4,2],'A-01-3'],
+    ['FO-001','Filtro olio motore','pz',14.5,'f1','8001234500125',[22,6],[10,5],'B-02-1'],
+    ['FA-004','Filtro aria motore','pz',38,'f1','8001234500132',[4,1],[5,2],'B-02-2'],
+    ['FG-007','Filtro gasolio','pz',19.9,'f1','8001234500149',[14,5],[8,3],'B-02-3'],
+    ['OL-1040','Olio motore 10W-40 (litri)','l',5.2,'f3','8001234500156',[210,60],[100,40],'C-fusto 1'],
+    ['AD-032','AdBlue (litri)','l',0.6,'f3','8001234500163',[480,0],[300,0],'C-cisterna'],
+    ['LT-055','Liquido refrigerante (litri)','l',3.9,'f3','8001234500170',[40,10],[20,10],'C-03'],
+    ['SP-220','Spazzola tergicristallo 1000 mm','pz',27,'f2','8001234500187',[8,2],[6,4],'D-04-1'],
+    ['LP-H7','Lampada H7 24V','pz',6.8,'f2','8001234500194',[30,12],[15,10],'D-04-2'],
+    ['BT-225','Batteria 12V 225Ah','pz',265,'f2','8001234500200',[2,0],[2,1],'E-01'],
+    ['CN-PV','Cinghia servizi poly-V','pz',44,'f4','8001234500217',[5,1],[3,2],'A-02-1']];
+  var art={},giac={};
+  A.forEach(function(a,i){var id='a'+(i+1);art[id]={id:id,cod:a[0],des:a[1],um:a[2],prezzo:a[3],forn:a[4],bc:a[5],min:{CEN:a[7][0],OFF:a[7][1]},ubi:a[8]};giac[id]={CEN:a[6][0],OFF:a[6][1]}});
+  var M=[[-26*H,'carico','a3','CEN',30,{forn:'f1',ddt:'DDT 1288/26'}],[-24*H,'scarico','a3','OFF',2,{mezzo:'v104',nota:'Tagliando'}],[-24*H,'scarico','a6','OFF',28,{mezzo:'v104',nota:'Tagliando'}],
+    [-20*H,'trasf','a1','CEN',4,{a:'OFF'}],[-9*H,'scarico','a1','OFF',1,{mezzo:'v305',nota:'Freni anteriori'}],[-8*H,'scarico','a2','OFF',2,{mezzo:'v305',nota:'Freni anteriori'}],
+    [-5*H,'scarico','a11','OFF',1,{mezzo:'v502',nota:'Batteria a terra'}],[-3*H,'carico','a7','CEN',300,{forn:'f3',ddt:'DDT 774/26'}],[-2*H,'scarico','a4','OFF',1,{mezzo:'v203',nota:'Filtro intasato'}],
+    [-3*D,'scarico','a9','OFF',2,{mezzo:'v201',nota:'Spazzole usurate'}],[-6*D,'scarico','a5','OFF',1,{mezzo:'v108',nota:'Tagliando'}],[-12*D,'scarico','a12','OFF',1,{mezzo:'v104',nota:'Cinghia rotta'}]];
+  var mov={};
+  M.forEach(function(m,i){var a=art[m[2]],o={id:'m'+i,ts:T0+m[0],tipo:m[1],art:m[2],sede:m[3],q:m[4],costo:a.prezzo,utente:'Mario R.'};Object.keys(m[5]).forEach(function(k){o[k]=m[5][k]});mov['m'+i]=o});
+  return {art:art,giac:giac,mov:mov,forn:forn};
+}
+function sedeN(s){var x=MAGSEDI.filter(function(a){return a[0]===s})[0];return x?x[1]:s}
+function gq(id,s){return +(((MAG.giac||{})[id]||{})[s]||0)}
+function aList(){return Object.keys(MAG.art||{}).map(function(k){return MAG.art[k]}).sort(function(a,b){return a.cod.localeCompare(b.cod)})}
+function isLowA(a,s){var m=+((a.min||{})[s]||0);return m>0&&gq(a.id,s)<m}
+function lowRows(){var o=[];aList().forEach(function(a){MAGSEDI.forEach(function(s){if(isLowA(a,s[0]))o.push({a:a,s:s[0]})})});return o}
+function eur(n){return '€ '+(+n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function qf(n){return (Math.round((+n||0)*100)/100).toLocaleString('it-IT')}
+function movList(){return Object.keys(MAG.mov||{}).map(function(k){return MAG.mov[k]}).sort(function(a,b){return b.ts-a.ts})}
+function costiMezzi(gg){var t=Date.now()-gg*864e5,o={};movList().forEach(function(m){if(m.tipo==='scarico'&&m.mezzo&&m.ts>=t){o[m.mezzo]=(o[m.mezzo]||0)+m.q*(+m.costo||0)}});return o}
+function vNum(id){var v=byId(id);return v?v.n:String(id||'').replace(/^v/,'')}
+function canMag(){if(!ME.role){toast('Accedi per modificare');openLogin();return false}if(ME.role==='piazzale'){toast('Con il tuo ruolo non puoi modificare il magazzino');return false}return true}
+function magSave(up,msg){DB.ref('depotrack_mag').update(up).then(function(){if(msg)toast(msg)}).catch(werr)}
+function nid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+
+function renderMag(){
+  var root=$('#mgroot');if(!root)return;
+  var low=lowRows(),arts=aList(),q=MQ.toLowerCase();
+  var val=arts.reduce(function(s,a){return s+(gq(a.id,'CEN')+gq(a.id,'OFF'))*(+a.prezzo||0)},0);
+  var cm=costiMezzi(30),tot30=Object.keys(cm).reduce(function(s,k){return s+cm[k]},0);
+  var CH=[['all','Tutti gli articoli'],['low','Sotto scorta'+(low.length?' ('+low.length+')':'')],['CEN','Magazzino centrale'],['OFF','Magazzino officina']];
+  var list=arts.filter(function(a){
+    if(MF==='low'&&!isLowA(a,'CEN')&&!isLowA(a,'OFF'))return false;
+    if((MF==='CEN'||MF==='OFF')&&!gq(a.id,MF)&&!isLowA(a,MF))return false;
+    return !q||(a.cod+' '+a.des+' '+a.bc+' '+a.ubi+' '+((MAG.forn||{})[a.forn]||{}).nome).toLowerCase().indexOf(q)>-1});
+  var h='<div class="mgk">'
+   +'<div class="w" style="--c:var(--acc)"><div class="wl">Articoli</div><div class="wv">'+arts.length+'</div><div class="wn">'+MAGSEDI.length+' magazzini</div></div>'
+   +'<div class="w mgclk" data-f="low" style="--c:var(--bad)"><div class="wl">Sotto scorta</div><div class="wv">'+low.length+'</div><div class="wn">righe da riordinare</div></div>'
+   +'<div class="w" style="--c:var(--ok)"><div class="wl">Valore</div><div class="wv mgsm">'+Math.round(val).toLocaleString('it-IT')+'<small>€</small></div><div class="wn">ricambi a magazzino</div></div>'
+   +'<div class="w" style="--c:var(--pre)"><div class="wl">Ricambi 30 gg</div><div class="wv mgsm">'+Math.round(tot30).toLocaleString('it-IT')+'<small>€</small></div><div class="wn">montati sui mezzi</div></div></div>'
+   +'<div class="mgbar"><label class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="mgq" placeholder="Codice, descrizione o barcode" autocomplete="off" value="'+esc(MQ)+'"></label>'
+   +'<button class="ibtn" id="mgbc">▥ Barcode</button><button class="ibtn btn-main" id="mgcar">＋ Carico</button><button class="ibtn" id="mgsca">－ Scarico</button><button class="ibtn" id="mgtr">⇄ Trasferisci</button><button class="ibtn" id="mgfo">🏭 Fornitori</button><button class="ibtn" id="mgnew">✚ Articolo</button></div>'
+   +'<div class="chips" style="margin:0 0 14px">'+CH.map(function(c){return '<button class="chip'+(MF===c[0]?' on':'')+'" data-f="'+c[0]+'">'+esc(c[1])+'</button>'}).join('')+'</div>'
+   +'<div class="fgrid">'+(list.map(function(a){var lc=isLowA(a,'CEN'),lo=isLowA(a,'OFF'),c=(lc||lo)?'var(--bad)':'var(--ok)';
+      return '<button class="fc mga" style="--c:'+c+'" data-id="'+a.id+'"><span class="mgcod">'+esc(a.cod)+'</span><span class="mgdes">'+esc(a.des)+'</span>'
+       +'<span class="mgq"><span class="'+(lc?'lo':'')+'"><small>Centrale</small><b>'+qf(gq(a.id,'CEN'))+'</b><em>min '+qf(a.min.CEN)+'</em></span><span class="'+(lo?'lo':'')+'"><small>Officina</small><b>'+qf(gq(a.id,'OFF'))+'</b><em>min '+qf(a.min.OFF)+'</em></span></span>'
+       +'<span class="m">'+esc(a.um)+' · '+eur(a.prezzo)+' · '+esc(a.ubi||'')+'</span></button>'}).join('')||'<div class="sub2">Nessun articolo trovato.</div>')+'</div>';
+  var cmK=Object.keys(cm).sort(function(a,b){return cm[b]-cm[a]}).slice(0,6),mx=cmK.length?cm[cmK[0]]:1;
+  h+='<div class="mg2"><div><div class="lab" style="margin-top:22px">Ultimi movimenti</div><div class="feed">'+movList().slice(0,8).map(movRow).join('')+'</div></div>'
+   +'<div><div class="lab" style="margin-top:22px">Costo ricambi per mezzo · 30 giorni</div><div class="w mgcost">'+(cmK.map(function(k){return '<button class="mgcr" data-v="'+esc(k)+'"><b>'+esc(vNum(k))+'</b><span class="mgbt"><i style="width:'+Math.max(4,cm[k]/mx*100)+'%"></i></span><em>'+eur(cm[k])+'</em></button>'}).join('')||'<div class="sub2">Nessuno scarico su mezzi negli ultimi 30 giorni.</div>')+'</div></div></div>';
+  root.innerHTML=h;
+  var qi=$('#mgq');qi.oninput=function(){MQ=this.value;var p=this.selectionStart;renderMag();var n=$('#mgq');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
+  qi.onkeydown=function(e){if(e.key==='Enter'){var a=findArt(this.value);if(a){MQ='';openArt(a.id)}}};
+  $$('#mgroot .chip,#mgroot .mgclk').forEach(function(b){b.onclick=function(){MF=b.dataset.f;renderMag()}});
+  $$('#mgroot .mga').forEach(function(b){b.onclick=function(){openArt(b.dataset.id)}});
+  $$('#mgroot .mgcr').forEach(function(b){b.onclick=function(){costoMezzo(b.dataset.v)}});
+  $('#mgcar').onclick=function(){movForm('carico')};$('#mgsca').onclick=function(){movForm('scarico')};$('#mgtr').onclick=function(){movForm('trasf')};
+  $('#mgfo').onclick=openForn;$('#mgnew').onclick=function(){artForm(null)};$('#mgbc').onclick=function(){scanBc(function(code){var a=findArt(code);if(a)openArt(a.id);else{toast('Codice '+code+' non trovato: puoi creare l\'articolo');artForm(null,code)}})};
+}
+function movRow(m){var a=(MAG.art||{})[m.art]||{cod:'?',des:'articolo eliminato',um:''},d=new Date(m.ts);
+  var t=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2),c=m.tipo==='carico'?'var(--ok)':m.tipo==='scarico'?'var(--pre)':'var(--acc)';
+  var x=m.tipo==='carico'?'Carico '+qf(m.q)+' '+a.um+' · '+esc(sedeN(m.sede))+(m.ddt?' · '+esc(m.ddt):'')+(m.forn&&MAG.forn[m.forn]?' · '+esc(MAG.forn[m.forn].nome):'')
+    :m.tipo==='scarico'?'Scarico '+qf(m.q)+' '+a.um+' · '+esc(sedeN(m.sede))+(m.mezzo?' → mezzo '+esc(vNum(m.mezzo)):'')+(m.nota?' · '+esc(m.nota):'')
+    :'Trasferiti '+qf(m.q)+' '+a.um+' · '+esc(sedeN(m.sede))+' → '+esc(sedeN(m.a));
+  return '<div class="ev" style="--c:'+c+'"><time>'+t+'</time><i></i><div><b>'+esc(a.cod)+'</b> '+esc(a.des)+'<br><span style="color:var(--mut);font-size:13px">'+x+' · '+esc(m.utente||'')+'</span></div></div>'}
+function findArt(v){v=String(v||'').trim().toLowerCase();if(!v)return null;return aList().filter(function(a){return a.bc===v||a.cod.toLowerCase()===v})[0]||null}
+
+function openArt(id){
+  var a=MAG.art[id];if(!a)return;var f=(MAG.forn||{})[a.forn]||{};
+  var mv=movList().filter(function(m){return m.art===id}).slice(0,6);
+  var h='<div class="sub2" style="margin:0">'+esc(a.cod)+' · barcode '+esc(a.bc||'—')+' · '+esc(a.um)+' · '+eur(a.prezzo)+' · ubicazione '+esc(a.ubi||'—')+'</div>'
+    +'<div class="frm">'+MAGSEDI.map(function(s){var lo=isLowA(a,s[0]);return '<div class="li" style="--c:'+(lo?'var(--bad)':'var(--ok)')+'"><span class="nn">'+qf(gq(id,s[0]))+'</span><span class="tx"><b>'+esc(s[1])+'</b><span>scorta minima '+qf(a.min[s[0]])+' '+esc(a.um)+'</span></span>'+(lo?'<span class="tag">SOTTO SCORTA</span>':'<span class="tag">OK</span>')+'</div>'}).join('')+'</div>'
+    +'<div class="lab" style="margin:6px 0 0">Fornitore</div><div class="sub2" style="margin:0"><b>'+esc(f.nome||'—')+'</b>'+(f.tel?' · '+esc(f.tel):'')+(f.mail?' · '+esc(f.mail):'')+'</div>'
+    +'<div class="lab" style="margin:6px 0 0">Ultimi movimenti</div><div class="feed">'+(mv.map(movRow).join('')||'<div class="sub2">Nessun movimento.</div>')+'</div>';
+  var M=modal({title:a.des,html:h,wide:true,foot:[{label:'✏ Modifica',fn:function(){artForm(id)}},{label:'✉ Preventivo',fn:function(){rdq([id])}},{label:'⇄ Trasferisci',fn:function(){movForm('trasf',id)}},{label:'－ Scarico',fn:function(){movForm('scarico',id)}},{label:'＋ Carico',cls:'pri',fn:function(){movForm('carico',id)}}]});
+}
+function selArt(sel){return '<select class="field" id="mf-a">'+aList().map(function(a){return '<option value="'+a.id+'"'+(a.id===sel?' selected':'')+'>'+esc(a.cod+' · '+a.des)+'</option>'}).join('')+'</select>'}
+function selSede(id,sel){return '<select class="field" id="'+id+'">'+MAGSEDI.map(function(s){return '<option value="'+s[0]+'"'+(s[0]===sel?' selected':'')+'>'+esc(s[1])+'</option>'}).join('')+'</select>'}
+function movForm(tipo,artId){
+  if(!canMag())return;
+  var T={carico:'＋ Carico merce',scarico:'－ Scarico ricambi',trasf:'⇄ Trasferimento tra magazzini'}[tipo];
+  var h='<div class="frm"><div><div class="lab">Articolo</div>'+selArt(artId)+'</div>'
+    +'<div><div class="lab">'+(tipo==='trasf'?'Da':'Magazzino')+'</div>'+selSede('mf-s',tipo==='scarico'?'OFF':'CEN')+'</div>'
+    +(tipo==='trasf'?'<div><div class="lab">A</div>'+selSede('mf-t','OFF')+'</div>':'')
+    +'<div><div class="lab">Quantità</div><input class="field" id="mf-q" type="number" inputmode="decimal" min="0" step="any" value="1"></div>'
+    +(tipo==='carico'?'<div><div class="lab">Fornitore</div><select class="field" id="mf-f">'+Object.keys(MAG.forn||{}).map(function(k){return '<option value="'+k+'">'+esc(MAG.forn[k].nome)+'</option>'}).join('')+'</select></div><div><div class="lab">N. DDT</div><input class="field" id="mf-d" placeholder="es. DDT 1301/26"></div><div><div class="lab">Prezzo unitario €</div><input class="field" id="mf-p" type="number" inputmode="decimal" step="any"></div>':'')
+    +(tipo==='scarico'?'<div><div class="lab">Montato sul mezzo</div><select class="field" id="mf-m"><option value="">— nessun mezzo (uso officina)</option>'+sortedV().map(function(v){return '<option value="'+esc(v.id)+'">'+esc(v.n+' · '+modelOf(v))+'</option>'}).join('')+'</select></div><div><div class="lab">Motivo</div><input class="field" id="mf-n" placeholder="es. tagliando, freni anteriori"></div>':'')
+    +'<div class="sub2" id="mf-g"></div></div>';
+  var M=modal({title:T,html:h,foot:[{label:'Annulla'},{label:'Registra',cls:'pri',keep:true,fn:function(){
+    var id=$('#mf-a',M.el).value,s=$('#mf-s',M.el).value,q=parseFloat(String($('#mf-q',M.el).value).replace(',','.')),a=MAG.art[id];
+    if(!(q>0)){toast('⚠ Quantità non valida');return}
+    var up={},mid=nid('m'),m={id:mid,ts:Date.now(),tipo:tipo,art:id,sede:s,q:q,costo:a.prezzo,utente:ME.name||'Demo'};
+    if(tipo!=='carico'&&gq(id,s)<q){toast('⚠ In '+sedeN(s)+' ci sono solo '+qf(gq(id,s))+' '+a.um);return}
+    if(tipo==='carico'){var pr=parseFloat(String($('#mf-p',M.el).value).replace(',','.'));m.forn=$('#mf-f',M.el).value;m.ddt=$('#mf-d',M.el).value.trim();if(pr>0){m.costo=pr;up['art/'+id+'/prezzo']=pr}up['giac/'+id+'/'+s]=gq(id,s)+q}
+    if(tipo==='scarico'){m.mezzo=$('#mf-m',M.el).value;m.nota=$('#mf-n',M.el).value.trim();up['giac/'+id+'/'+s]=gq(id,s)-q}
+    if(tipo==='trasf'){var t=$('#mf-t',M.el).value;if(t===s){toast('⚠ Scegli due magazzini diversi');return}m.a=t;up['giac/'+id+'/'+s]=gq(id,s)-q;up['giac/'+id+'/'+t]=gq(id,t)+q}
+    Object.keys(m).forEach(function(k){if(m[k]==='')delete m[k]});up['mov/'+mid]=m;
+    magSave(up,{carico:'Caricati ',scarico:'Scaricati ',trasf:'Trasferiti '}[tipo]+qf(q)+' '+a.um+' · '+a.cod+(m.mezzo?' sul mezzo '+vNum(m.mezzo):''));
+    if(tipo==='scarico'&&m.mezzo)addLog('stato','🔧 Vet. '+vNum(m.mezzo)+': montato '+a.cod+' '+a.des+' ×'+qf(q),{vid:m.mezzo});
+    M.close();}}]});
+  function giac(){var id=$('#mf-a',M.el).value,a=MAG.art[id];$('#mf-g',M.el).innerHTML='Disponibili: '+MAGSEDI.map(function(s){return esc(s[1])+' <b>'+qf(gq(id,s[0]))+'</b> '+esc(a.um)}).join(' · ');if($('#mf-p',M.el)&&!$('#mf-p',M.el).value)$('#mf-p',M.el).placeholder=String(a.prezzo).replace('.',',');if($('#mf-f',M.el))$('#mf-f',M.el).value=a.forn}
+  $('#mf-a',M.el).onchange=giac;giac();
+}
+function artForm(id,bc){
+  if(!canMag())return;
+  var a=id?MAG.art[id]:{cod:'',des:'',um:'pz',prezzo:'',forn:'f1',bc:bc||'',min:{CEN:0,OFF:0},ubi:''};
+  var fl=function(k,l,v,t){return '<div><div class="lab">'+l+'</div><input class="field" id="af-'+k+'" '+(t?'type="'+t+'" inputmode="decimal" step="any" ':'')+'value="'+esc(v==null?'':v)+'"></div>'};
+  var h='<div class="frm">'+fl('cod','Codice',a.cod)+fl('des','Descrizione',a.des)+fl('bc','Barcode',a.bc)+fl('um','Unità di misura',a.um)+fl('pr','Prezzo €',a.prezzo,'number')
+    +'<div><div class="lab">Fornitore abituale</div><select class="field" id="af-f">'+Object.keys(MAG.forn||{}).map(function(k){return '<option value="'+k+'"'+(k===a.forn?' selected':'')+'>'+esc(MAG.forn[k].nome)+'</option>'}).join('')+'</select></div>'
+    +fl('mc','Scorta minima · centrale',a.min.CEN,'number')+fl('mo','Scorta minima · officina',a.min.OFF,'number')+fl('ubi','Ubicazione',a.ubi)+'</div>';
+  var M=modal({title:id?'Modifica articolo':'Nuovo articolo',html:h,foot:(id?[{label:'🗑 Elimina',cls:'danger',fn:function(){confirmBox('Eliminare '+a.cod+'?','Lo storico dei movimenti resta.',function(){var u={};u['art/'+id]=null;u['giac/'+id]=null;magSave(u,'Articolo eliminato')},'Elimina',true)}}]:[]).concat([{label:'Annulla'},{label:'Salva',cls:'pri',keep:true,fn:function(){
+    var g=function(k){return $('#af-'+k,M.el).value.trim()},n=function(k){return Math.max(0,parseFloat(g(k).replace(',','.'))||0)};
+    var cod=g('cod').toUpperCase();if(!cod||!g('des')){toast('⚠ Codice e descrizione obbligatori');return}
+    if(aList().some(function(x){return x.cod===cod&&x.id!==id})){toast('⚠ Codice già presente');return}
+    var nid2=id||nid('a'),o={id:nid2,cod:cod,des:g('des'),bc:g('bc'),um:g('um')||'pz',prezzo:n('pr'),forn:$('#af-f',M.el).value,min:{CEN:n('mc'),OFF:n('mo')},ubi:g('ubi')},u={};
+    u['art/'+nid2]=o;if(!id)u['giac/'+nid2]={CEN:0,OFF:0};magSave(u,'Articolo '+cod+' salvato');M.close();if(!id)setTimeout(function(){openArt(nid2)},200)}}])});
+}
+function openForn(){
+  var F=Object.keys(MAG.forn||{}).map(function(k){return MAG.forn[k]});
+  var h='<div class="frm">'+F.map(function(f){var n=aList().filter(function(a){return a.forn===f.id}).length,lw=lowRows().filter(function(r){return r.a.forn===f.id}).length;
+    return '<div class="li" style="--c:'+(lw?'var(--bad)':'var(--acc)')+'"><span class="tx"><b>'+esc(f.nome)+'</b><span>'+esc(f.tel)+' · '+esc(f.mail)+' · '+n+' articoli'+(f.note?' · '+esc(f.note):'')+'</span></span>'+(lw?'<button class="ibtn" data-f="'+f.id+'">✉ Preventivo ('+lw+')</button>':'<span class="tag">scorte ok</span>')+'</div>'}).join('')+'</div>'
+    +'<div class="sub2">Il pulsante <b>Preventivo</b> prepara la mail con gli articoli sotto scorta di quel fornitore: si apre nella tua posta, pronta da inviare.</div>';
+  var M=modal({title:'🏭 Fornitori',html:h,wide:true,foot:[{label:'Chiudi'}]});
+  $$('[data-f]',M.el).forEach(function(b){b.onclick=function(){rdq(lowRows().filter(function(r){return r.a.forn===b.dataset.f}).map(function(r){return r.a.id}))}});
+}
+function rdq(ids){
+  ids=ids.filter(function(v,i){return ids.indexOf(v)===i});if(!ids.length)return;
+  var a0=MAG.art[ids[0]],f=(MAG.forn||{})[a0.forn]||{};
+  var righe=ids.map(function(id){var a=MAG.art[id],need=Math.max(1,MAGSEDI.reduce(function(s,x){return s+Math.max(0,(+a.min[x[0]]||0)*2-gq(id,x[0]))},0));return '- '+a.cod+' '+a.des+': '+qf(need)+' '+a.um}).join('\n');
+  var body='Buongiorno,\nvi chiediamo la vostra migliore offerta, con tempi di consegna, per:\n\n'+righe+'\n\nConsegna presso il magazzino centrale.\nGrazie,\n'+(ME.name||'')+'\n';
+  var subj='Richiesta di preventivo ricambi';
+  var M=modal({title:'✉ Richiesta di preventivo',top:true,html:'<div class="sub2" style="margin:0">A: <b>'+esc(f.nome||'')+'</b> · '+esc(f.mail||'')+'</div><textarea class="field" id="rq-b" rows="10" style="font-family:var(--f-mono);font-size:13px;resize:vertical">'+esc(body)+'</textarea>',
+    foot:[{label:'Annulla'},{label:'Apri nella posta',cls:'pri',fn:function(){location.href='mailto:'+encodeURIComponent(f.mail||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent($('#rq-b',M.el).value)}}]});
+}
+function costoMezzo(vid){
+  var L=movList().filter(function(m){return m.tipo==='scarico'&&m.mezzo===vid}),tot=L.reduce(function(s,m){return s+m.q*(+m.costo||0)},0);
+  modal({title:'Ricambi montati · mezzo '+esc(vNum(vid)),wide:true,html:'<div class="sub2" style="margin:0">Totale storico: <b>'+eur(tot)+'</b> · '+L.length+' scarichi</div><div class="feed">'+L.map(movRow).join('')+'</div>',foot:[{label:'Apri il mezzo',fn:function(){if(byId(vid))openInsp(vid)}},{label:'Chiudi'}]});
+}
+/* barcode: lettore USB/bluetooth (scrive e preme Invio) oppure fotocamera dove il browser lo permette */
+function scanBc(cb){
+  var hasCam=('BarcodeDetector' in window)&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.isSecureContext,stream=null,stop=false;
+  var M=modal({title:'▥ Leggi barcode',top:true,onclose:function(){stop=true;if(stream)stream.getTracks().forEach(function(t){t.stop()})},
+    html:(hasCam?'<video id="bc-v" playsinline muted style="width:100%;border-radius:16px;background:#000;max-height:46vh;object-fit:cover"></video>':'<div class="sub2" style="margin:0">Su questo dispositivo la lettura con la fotocamera non è disponibile nel browser: usa un lettore barcode USB o bluetooth, oppure scrivi il codice. Nella versione definitiva la fotocamera funziona anche su iPhone.</div>')
+      +'<input class="field" id="bc-i" placeholder="Spara il codice o scrivilo e premi Invio" inputmode="numeric" autocomplete="off"><div class="sub2" style="margin:0">Prova con <b>8001234500101</b> (pastiglie freno).</div>',
+    foot:[{label:'Annulla'},{label:'Cerca',cls:'pri',fn:function(){var v=$('#bc-i',M.el).value.trim();if(v)cb(v)}}]});
+  var inp=$('#bc-i',M.el);setTimeout(function(){inp.focus()},50);
+  inp.onkeydown=function(e){if(e.key==='Enter'&&inp.value.trim()){var v=inp.value.trim();M.close();cb(v)}};
+  if(hasCam){var det=new BarcodeDetector();navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(s){stream=s;var v=$('#bc-v',M.el);if(!v){s.getTracks().forEach(function(t){t.stop()});return}v.srcObject=s;v.play();
+    (function loop(){if(stop)return;det.detect(v).then(function(r){if(r&&r.length&&!stop){var code=r[0].rawValue;if(navigator.vibrate)navigator.vibrate(60);M.close();cb(code)}else setTimeout(loop,180)}).catch(function(){setTimeout(loop,400)})})();
+  }).catch(function(){var v=$('#bc-v',M.el);if(v)v.outerHTML='<div class="sub2" style="margin:0">Fotocamera non disponibile o permesso negato: usa il campo qui sotto.</div>'})}
+}
+function startMag(){
+  DB.ref('depotrack_mag').on('value',function(s){var v=s.val();if(!v||!v.art){DB.ref('depotrack_mag').set(magSeed());return}MAG=v;MAG.forn=MAG.forn||{};MAG.mov=MAG.mov||{};MAG.giac=MAG.giac||{};if(S.view==='magazzino')renderMag()});
 }
 
 /* ---------- avvio ---------- */
