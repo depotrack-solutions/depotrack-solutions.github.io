@@ -1463,7 +1463,7 @@ function stats(){
 }
 
 /* ---------- scritture sul database (stesso formato di DepoTrack) ---------- */
-var PIN_CODE='1899',pinOn=false;
+var PIN_CODE='',pinOn=false;
 var MOTIVI=['Guasto meccanico','Guasto elettrico','Incidente','Revisione programmata','Manutenzione ordinaria','In attesa ricambi','Controllo tecnico'];
 function nk(p){return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
 function werr(e){toast('⚠ Scrittura rifiutata: '+((e&&(e.code||e.message))||'errore'))}
@@ -2117,6 +2117,7 @@ function togglePin(){
 
 /* ---------- login ---------- */
 function openLogin(){
+  if(AUTH&&!ME.role)AUTH.signInWithEmailAndPassword('demo','demo');return;
   if(ME.role)return;
   var file=location.protocol==='file:';
   var h='';
@@ -2136,7 +2137,7 @@ function openLogin(){
   setTimeout(function(){$('#lg-e',M.el).focus()},60);
 }
 var inact=null;
-function resetInact(){if(inact){clearTimeout(inact);inact=null}if(!ME.uid)return;inact=setTimeout(function(){if(ME.uid){toast('Sessione scaduta per inattività');signOutClean()}},20*60*1000)}
+function resetInact(){return;if(inact){clearTimeout(inact);inact=null}if(!ME.uid)return;inact=setTimeout(function(){if(ME.uid){toast('Sessione scaduta per inattività');signOutClean()}},20*60*1000)}
 ['mousedown','keydown','touchstart','click'].forEach(function(ev){document.addEventListener(ev,resetInact,{passive:true})});
 var myPres=null,presConn=null;
 function setupPresence(){
@@ -2169,9 +2170,9 @@ function onAuth(user){
 }
 function paintUser(){
   var el=$('#user');
-  if(ME.uid)el.innerHTML='<button class="userchip" id="bUser" title="Esci"><span class="nm3">'+esc(ME.name)+'</span><small>'+esc(ME.role.toUpperCase())+'</small><span>🚪</span></button>';
+  if(ME.uid)el.innerHTML='<button class="userchip" id="bUser" title="Utente demo"><span class="nm3">'+esc(ME.name)+'</span><small>DEMO</small></button>';
   else el.innerHTML='<button class="ibtn" id="bUser">🔑<span class="lbl">Accedi</span></button>';
-  $('#bUser').onclick=function(){if(ME.uid)confirmBox('Uscire da DepoTrack?','Dovrai rifare l\'accesso per modificare.',signOutClean,'Esci');else openLogin()};
+  $('#bUser').onclick=function(){if(ME.uid)toast('Demo: sei dentro come responsabile flotta, senza password. Nella versione vera ognuno ha il suo utente.');else openLogin()};
   $$('.su-only').forEach(function(e){e.hidden=ME.role!=='superuser'});
   renderOff();
 }
@@ -3594,7 +3595,7 @@ function loadDemo(reason){DEMO_DB.reset();return;
   if(gotData)return;
   var p=demoPayload();S.live=false;demoOn=true;
   ingest(p.data);TURNI=p.turni;
-  var T0=Date.now();offIngest({post:{L1:{vid:'v2040',n:'2040',ts:T0-26*36e5},L2:{vid:'v2047',n:'2047',ts:T0-3*36e5},C1:{vid:'v6631',n:'6631',ts:T0-50*6e4},C2:{vid:'v3003',n:'3003',ts:T0-5*36e5},C4:{vid:'v3011',n:'3011',ts:T0-2*36e5},C5:{vid:'v6681',n:'6681',ts:T0-20*6e4},R1:{vid:'v2051',n:'2051',ts:T0-30*36e5}},label:{L1:'Carrozzeria',L2:'Carrozzeria',C1:'Meccanica',C2:'Elettrico',C4:'Revisione',C5:'Diagnosi',R1:'Ente esterno'}});RENTRI={last:T0-5*864e5,by:'Mauro',next:T0+2*864e5};
+  var T0=Date.now();offIngest({post:{L1:{vid:'v2040',n:'2040',ts:T0-26*36e5},L2:{vid:'v2047',n:'2047',ts:T0-3*36e5},C1:{vid:'v6631',n:'6631',ts:T0-50*6e4},C2:{vid:'v3003',n:'3003',ts:T0-5*36e5},C4:{vid:'v3011',n:'3011',ts:T0-2*36e5},C5:{vid:'v6681',n:'6681',ts:T0-20*6e4},R1:{vid:'v2051',n:'2051',ts:T0-30*36e5}},label:{L1:'Carrozzeria',L2:'Carrozzeria',C1:'Meccanica',C2:'Elettrico',C4:'Revisione',C5:'Diagnosi',R1:'Ente esterno'}});RENTRI={last:T0-5*864e5,by:'Mario R.',next:T0+2*864e5};
   LIVELOG=p.log.map(function(e){return {t:e[0],x:e[1],c:e[2]}});
   setStatus('demo',reason);render();
 }
