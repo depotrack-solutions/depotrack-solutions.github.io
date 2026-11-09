@@ -1021,6 +1021,12 @@ body.dense .st .rvi{top:6px!important;right:48px!important;font-size:12px}
 .simcap .scbar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--acc);transform-origin:left;animation:scb 10s linear forwards}
 @keyframes scb{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 .st.simhi{outline:3px solid var(--acc);outline-offset:4px;border-radius:16px}
+.ctor{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+.ctor::before,.ctor::after{content:"";flex:1;height:1px;background:var(--line)}
+.ctwa{justify-content:center;background:#25D366!important;color:#06210f!important;text-decoration:none;font-weight:700}
+.ctwa small{font-weight:500;opacity:.75}
+.ctok{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:20px 0}
+.ctok b{font-size:18px}.ctok span{color:var(--mut)}
 </style>
 </head>
 <body class="v3d s-solid">
@@ -3915,6 +3921,7 @@ function buildFab(){
     +'<a class="fabb wa" id="bWa" href="'+waLink()+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4 5.2 5.2 0 0 0 3.2.7 2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg><span class="ft">La voglio con i miei mezzi</span></a>';
   document.body.appendChild(d);
   $('#bSim').onclick=function(){simToggle()};
+  $('#bWa').onclick=function(e){e.preventDefault();openContatto()};
 }
 /* ---------- simulazione giornata ---------- */
 var SIM=null,SIMN=0;
@@ -3985,7 +3992,7 @@ var TOUR=[
   {s:'.tab[data-v="magazzino"]',t:'Il magazzino ricambi',x:'Giacenze per sede, scorte minime, carichi da DDT e ricambi scaricati sui mezzi, con il costo per ogni vettura.'},
   {s:'#bMenu',t:'Report e configurazione',x:'Fermi, statistiche, disponibilità, revisioni, esportazioni in Excel e PDF. Da qui configuri anche corsie, stati e tipologie.'},
   {s:'#bSim',t:'Guardala lavorare',x:'Premi "Simula una giornata": ogni 10 secondi succede qualcosa, la pagina va da sola sullo stallo interessato e ti spiega cosa sta accadendo.'},
-  {s:'#bWa',t:'Ti piace?',x:'Scrivimi su WhatsApp: preparo la demo con i tuoi mezzi, le tue corsie e il tuo logo.',end:true}
+  {s:'#bWa',t:'Ti piace?',x:'Lasciami nome e telefono, oppure scrivimi su WhatsApp: preparo la demo con i tuoi mezzi, le tue corsie e il tuo logo.',end:true}
 ];
 var TI=0,tourEl=null;
 function tourStart(){TI=0;closeInsp&&closeInsp();hmenu.classList.remove('open');look.classList.remove('open');if(S.view!=='piazzale')go('piazzale');window.scrollTo(0,0);tourShow()}
@@ -3998,7 +4005,7 @@ function tourShow(){
   if(!tourEl){tourEl=document.createElement('div');tourEl.className='tour';document.body.appendChild(tourEl)}
   tourEl.innerHTML='<div class="tspot"></div><div class="tcard" role="dialog"><div class="tstep">'+(TI+1)+' / '+TOUR.length+'</div><h3>'+esc(st.t)+'</h3><p>'+esc(st.x)+'</p><div class="tbtn">'
     +'<button class="ibtn tskip">'+(st.end?'Chiudi':'Salta')+'</button>'+(TI?'<button class="ibtn tprev">Indietro</button>':'')
-    +(st.end?'<a class="ibtn pri" href="'+waLink()+'" target="_blank" rel="noopener">Scrivimi</a>':'<button class="ibtn pri tnext">'+(TI?'Avanti':'Iniziamo')+'</button>')+'</div></div>';
+    +(st.end?'<button class="ibtn pri tcont">Contattami</button>':'<button class="ibtn pri tnext">'+(TI?'Avanti':'Iniziamo')+'</button>')+'</div></div>';
   var sp=$('.tspot',tourEl),cd=$('.tcard',tourEl);
   function place(){
     if(!el){sp.style.cssText='left:50%;top:40%;width:0;height:0';cd.style.cssText='left:50%;top:50%;transform:translate(-50%,-50%)';return}
@@ -4012,7 +4019,7 @@ function tourShow(){
   $('.tskip',tourEl).onclick=tourEnd;
   var n=$('.tnext',tourEl);if(n)n.onclick=function(){TI++;tourShow()};
   var p=$('.tprev',tourEl);if(p)p.onclick=function(){TI--;tourShow()};
-  var a=$('.tcard a',tourEl);if(a)a.addEventListener('click',function(){setTimeout(tourEnd,100)});
+  var c=$('.tcont',tourEl);if(c)c.onclick=function(){tourEnd();openContatto()};
 }
 window.addEventListener('resize',function(){if(tourEl)tourShow()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&tourEl)tourEnd()});
@@ -4041,6 +4048,41 @@ function startDemoExtras(){
   if(ls('dtf_tour')!=='1')setTimeout(tourStart,900);
 }
 buildFab();
+
+/* ---------- contatto: modulo che arriva per email (FormSubmit, gratuito) e, se attivato, su WhatsApp (CallMeBot) ---------- */
+var MAIL_TO='depotrack-solutions@proton.me';
+var CMB_KEY='';   /* chiave CallMeBot: vuota = solo email */
+function openContatto(){
+  var tel=matchMedia('(pointer:coarse)').matches;
+  var f=function(id,l,t,ph){return '<div><div class="lab">'+l+'</div><input class="field" id="ct-'+id+'" type="'+t+'" placeholder="'+ph+'" autocomplete="'+({n:'name',a:'organization',t:'tel',e:'email'}[id]||'off')+'"></div>'};
+  var waB='<a class="ibtn ctwa" href="'+waLink()+'" target="_blank" rel="noopener">💬 Scrivimi su WhatsApp'+(tel?'':' <small>(da PC serve WhatsApp Web)</small>')+'</a>';
+  var M=modal({title:'La voglio con i miei mezzi',html:
+    '<div class="sub2" style="margin:0">Preparo la demo con i vostri mezzi, le vostre corsie e il vostro logo. Lasciami un recapito e ti richiamo io al più presto.</div>'
+    +(tel?waB+'<div class="ctor"><span>oppure lascia i tuoi dati</span></div>':'')
+    +'<div class="frm">'+f('n','Nome e cognome','text','es. Mario Rossi')+f('a','Azienda','text','es. Trasporti Rossi Srl')+f('t','Telefono','tel','es. 333 123 4567')+f('e','Email (facoltativa)','email','nome@azienda.it')
+    +'<div><div class="lab">Messaggio (facoltativo)</div><textarea class="field" id="ct-m" rows="3" placeholder="Quanti mezzi avete, cosa vi serve…"></textarea></div><div class="sub2" id="ct-s" style="margin:0"></div></div>'
+    +(tel?'':'<div class="ctor"><span>oppure</span></div>'+waB)
+    +'<div class="sub2" style="margin:0;font-size:12px">Mauro Baravaglio · DepoTrack Solutions · +39 392 448 2167 · '+MAIL_TO+'</div>',
+    foot:[{label:'Annulla'},{label:'Ricontattatemi',cls:'pri',keep:true,fn:function(){inviaContatto(M)}}]});
+  if(CLIENTE)$('#ct-a',M.el).value=CLIENTE;
+}
+function inviaContatto(M){
+  var g=function(k){return $('#ct-'+k,M.el).value.trim()},st=$('#ct-s',M.el);
+  var d={nome:g('n'),azienda:g('a'),telefono:g('t'),email:g('e'),messaggio:g('m')};
+  if(!d.nome){st.innerHTML='<b style="color:var(--bad)">Scrivi il nome.</b>';return}
+  if(!d.telefono&&!d.email){st.innerHTML='<b style="color:var(--bad)">Serve almeno il telefono o l\'email per ricontattarti.</b>';return}
+  if(d.email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)){st.innerHTML='<b style="color:var(--bad)">L\'email non sembra giusta.</b>';return}
+  var bt=$$('.mf .ibtn',M.el).pop();bt.disabled=true;bt.textContent='Invio…';st.textContent='';
+  var body={_subject:'Richiesta demo DepoTrack · '+(d.azienda||d.nome),_template:'table',_captcha:'false',Nome:d.nome,Azienda:d.azienda||'—',Telefono:d.telefono||'—',Email:d.email||'—',Messaggio:d.messaggio||'—',Demo:location.href};
+  if(d.email)body._replyto=d.email;
+  var ok=function(){M.el.querySelector('.mb').innerHTML='<div class="ctok"><div style="font-size:44px">✅</div><b>Richiesta inviata, grazie '+esc(d.nome.split(' ')[0])+'!</b><span>Ti ricontatto al più presto'+(d.telefono?' al '+esc(d.telefono):'')+'.</span></div>';
+    var f=$('.mf',M.el);f.innerHTML='';var c=document.createElement('button');c.className='ibtn pri';c.textContent='Chiudi';c.onclick=M.close;f.appendChild(c)};
+  var ko=function(){bt.disabled=false;bt.textContent='Riprova';st.innerHTML='<b style="color:var(--bad)">Invio non riuscito (connessione?).</b> Scrivimi su WhatsApp o chiamami al +39 392 448 2167.'};
+  if(CMB_KEY){var t='🚌 DepoTrack · nuova richiesta demo\n'+d.nome+(d.azienda?' · '+d.azienda:'')+'\n📞 '+(d.telefono||'—')+'\n✉ '+(d.email||'—')+(d.messaggio?'\n📝 '+d.messaggio:'');
+    try{fetch('https://api.callmebot.com/whatsapp.php?phone=%2B'+WA_NUM+'&apikey='+encodeURIComponent(CMB_KEY)+'&text='+encodeURIComponent(t),{mode:'no-cors'}).catch(function(){})}catch(e){}}
+  fetch('https://formsubmit.co/ajax/'+MAIL_TO,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(r.ok&&String(j.success)!=='false')ok();else ko()})}).catch(ko);
+}
 
 /* ---------- avvio ---------- */
 $('#fq').oninput=function(){S.q=this.value;renderFlotta()};
