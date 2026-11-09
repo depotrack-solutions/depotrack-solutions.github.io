@@ -839,7 +839,6 @@ body.ui-tramonto .clk #clkT .fp>span{background:linear-gradient(180deg,#343a6b,#
    STILI DEL GESTIONALE MAGAZZINO (Neon · Liquid Glass · Blueprint · Essenziale)
    portati su Aurora: si scelgono da Aspetto → Stile, valgono con tutte le palette
    ===================================================================== */
-body[class*=" px-"],body[class^="px-"]{--f-display:"Space Grotesk","Inter",system-ui,sans-serif;--f-body:"Inter",system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,monospace;--dw:700;--dsc:1;--dls:-.04em}
 .pxs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pxc{display:flex;flex-direction:column;gap:6px;text-align:left;padding:8px;border-radius:14px;border:1.5px solid var(--line);background:rgba(128,128,150,.08);cursor:pointer;transition:.2s}
 .pxc:hover,.pxc.on{border-color:var(--acc)}.pxc.on{box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
@@ -892,7 +891,7 @@ body.px-bp{--bpl:color-mix(in srgb,var(--acc) 38%,transparent);--brass:var(--acc
 body.px-bp .ambient{display:none}
 body.px-bp :is(.bar,.w,.wx,.clk,.fc,.ev,.insp,.look,.hmenu,.modal,.cmd){border-radius:8px;background:color-mix(in srgb,var(--bg) 82%,var(--acc) 5%);border:1px solid var(--bpl);box-shadow:0 0 0 3px color-mix(in srgb,var(--bg) 70%,transparent),0 0 0 4px color-mix(in srgb,var(--acc) 14%,transparent),0 18px 40px rgba(0,0,0,.35);-webkit-backdrop-filter:none;backdrop-filter:none}
 body.px-bp :is(.wl,.sid,.eyebrow,.sh h2,.legend,.lab,.look h3){text-transform:uppercase;letter-spacing:1.4px}
-body.px-bp h1{font-family:"Space Grotesk",Inter,sans-serif;letter-spacing:.02em;text-transform:uppercase;font-size:calc(clamp(40px,8vw,104px))}
+body.px-bp h1{text-transform:uppercase;font-size:calc(clamp(40px,8vw,104px) * var(--dsc))}
 body.px-bp .tabs{border-radius:6px;padding:3px;background:transparent;border:1px solid var(--bpl)}
 body.px-bp .tab{border-radius:4px;text-transform:uppercase;letter-spacing:1px;font-size:12px}
 body.px-bp .tab-ind{border-radius:4px;background:color-mix(in srgb,var(--acc) 20%,transparent);border:1px solid var(--acc);box-shadow:inset 0 0 10px color-mix(in srgb,var(--acc) 40%,transparent),0 0 12px color-mix(in srgb,var(--acc) 30%,transparent)}
