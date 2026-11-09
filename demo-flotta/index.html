@@ -958,6 +958,15 @@ body.px-min .ring{filter:none}
 .mgbt{height:9px;border-radius:99px;background:rgba(128,128,150,.2);overflow:hidden}.mgbt i{display:block;height:100%;border-radius:99px;background:var(--pre)}
 @media (max-width:900px){.mgk{grid-template-columns:repeat(2,minmax(0,1fr))}.mg2{grid-template-columns:1fr}}
 @media (max-width:560px){.mgbar .ibtn{flex:1 1 calc(33% - 8px);justify-content:center;padding:9px 6px;font-size:13px}.mgk .wv.mgsm{font-size:calc(30px * var(--dsc))}.mgk{gap:10px}}
+
+/* pallino in alto a destra = colore della tipologia (il riquadro resta il colore dello stato) */
+.st:not(.free) .dot{background:var(--t,#fff)!important;width:13px!important;height:13px!important;border-radius:50%!important;box-shadow:0 0 0 2px rgba(255,255,255,.92),0 1px 5px rgba(0,0,0,.5)!important}
+body.dense .st:not(.free) .dot{width:10px!important;height:10px!important}
+.tleg{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12.5px;color:var(--mut);margin-right:auto}
+.tleg b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.tleg span{display:inline-flex;align-items:center;gap:6px}
+.tleg i{width:11px;height:11px;border-radius:50%;background:var(--t);box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.sh:has(#tleg){justify-content:space-between}
 </style>
 </head>
 <body class="v3d s-solid">
@@ -978,7 +987,7 @@ body.px-min .ring{filter:none}
     <button class="ibtn" style="display:none" id="bOffWin" aria-label="Apri dashboard officina" title="Dashboard officina in una finestra a parte">🔧<span class="lbl">Officina</span></button>
     <button class="ibtn" id="bSearch" aria-label="Cerca mezzo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="lbl">Cerca</span><span class="kbd">⌘K</span></button>
     <button class="ibtn" id="bLook" aria-label="Aspetto"><span class="swatchdot"></span><span class="lbl">Aspetto</span></button>
-    <button class="ibtn pri" id="b3d" aria-label="Cambia vista 2D 3D">3D</button>
+    <button class="ibtn pri" style="display:none" id="b3d" aria-label="Cambia vista 2D 3D">3D</button>
     <button class="ibtn su-only" id="bMenu" aria-label="Menu" aria-haspopup="true">☰<span class="lbl">Menu</span></button>
     <span id="user"></span>
   </div>
@@ -1010,7 +1019,7 @@ body.px-min .ring{filter:none}
 </section>
 
 <section class="view on" id="v-piazzale">
-  <div class="sh"><h2>Piazzale</h2><span class="hint" id="pHint">Tocca un mezzo per aprirlo. In 2D puoi trascinarlo su un altro stallo.</span></div>
+  <div class="sh"><h2>Piazzale</h2><div class="tleg" id="tleg"></div><span class="hint" id="pHint">Tocca un mezzo per aprirlo. In 2D puoi trascinarlo su un altro stallo.</span></div>
   <div class="stage" id="stage"><div class="board" id="board"></div></div>
 </section>
 
@@ -1043,8 +1052,7 @@ body.px-min .ring{filter:none}
   <h3>Palette</h3><div class="pals" id="pals"></div>
   <h3>Font</h3><div class="fonts" id="fonts"></div>
   <h3>Stile stalli</h3><div class="row" id="styles"></div>
-  <h3>Colore stalli</h3><div class="row" id="cols"></div>
-  <h3>Vista</h3><div class="row" id="views"></div>
+  <div hidden><div id="cols"></div><div id="views"></div></div>
   <h3>Movimento</h3><button class="tg" id="tgMotion" style="width:100%"><span>Animazioni e luce che segue il puntatore</span><span class="sw on" id="swMotion"></span></button>
 </div>
 
@@ -1141,6 +1149,9 @@ window.DEMO_DB={
   load:function(seed){
     var s=null;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
     ROOT=(s&&s.depotrack&&s.depotrack.fleet)?s:seed();
+    /* colori tipologia della prima versione: li porto ai nuovi, diversi dai colori degli stati */
+    var OLD={GT:['#4fa3e0','#3a86ff'],INT:['#2ecc71','#ff006e'],URB:['#9b7fe8','#00e5ff'],MID:['#e07fa0','#fb5607'],MINI:['#f0a500','#ffbe0b'],NCC:['#e06030','#1b1b1b']};
+    try{(ROOT.depotrack.tipi||[]).forEach(function(t){if(t&&OLD[t.id]&&String(t.colore).toLowerCase()===OLD[t.id][0])t.colore=OLD[t.id][1]})}catch(e){}
     USER={uid:'demo',email:'demo@depotrack.it'};
   },
   reset:function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()}
@@ -1166,12 +1177,12 @@ function demoSeed(){
   var T0=Date.now(),H=36e5,D=864e5;
   function dmy(g){var d=new Date(T0+g*D);return ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear()}
   var tipi=[
-    ['GT','Gran Turismo','#4fa3e0','ga'],
-    ['INT','Interurbano','#2ecc71','ga'],
-    ['URB','Urbano elettrico','#9b7fe8','el'],
-    ['MID','Midibus','#e07fa0','ga'],
-    ['MINI','Minibus','#f0a500','ga'],
-    ['NCC','NCC','#e06030','ib']
+    ['GT','Gran Turismo','#3a86ff','ga'],
+    ['INT','Interurbano','#ff006e','ga'],
+    ['URB','Urbano elettrico','#00e5ff','el'],
+    ['MID','Midibus','#fb5607','ga'],
+    ['MINI','Minibus','#ffbe0b','ga'],
+    ['NCC','NCC','#1b1b1b','ib']
   ].map(function(a){return {id:a[0],nome:a[1],code:a[0],colore:a[2],alim:a[3]}});
   var stati=[['disp','Disponibile','#3ddc97'],['ferma','Ferma','#ff5d5d'],['fermat','Ferma temporanea','#b57bff'],['serv','In servizio','#ffc247'],['maint','Manutenzione esterna','#4fa8ff']]
     .map(function(a){return {id:a[0],nome:a[1],colore:a[2]}});
@@ -1232,7 +1243,7 @@ function alimLab(k){var a=ALIMS.filter(function(x){return x[0]===k})[0];return a
 function tipoOf(v){return TIPI[v.tipo]||{nome:v.tipo||'?',code:v.tipo||'?',colore:'#7d8590'}}
 function stOf(s){return ST[s]||[s||'?','#7d8590']}
 function isFerma(s){return isPura(s)||isTemp(s)}
-function colorOf(v){if(S.col==='tipo'&&!isFerma(v.s))return tipoOf(v).colore;return stOf(v.s)[1]}
+function colorOf(v){return stOf(v.s)[1]}
 function turnoOf(v){return v.stall?(TURNI[v.stall]||''):''}
 function modelOf(v){return v.model||tipoOf(v).nome}
 function shortSt(s){var n=lname(s);if(isTemp(s))return 'Temp.';if(n.indexOf('prestito')>-1)return 'Prestito';if(n.indexOf('manut')>-1)return 'Manut.';if(n.indexOf('chiamat')>-1)return 'Chiamata';return stOf(s)[0].split(' ')[0]}
@@ -1401,10 +1412,10 @@ function paintStall(sid){
   el.classList.toggle('sel',!!(v&&S.sel===v.id));
   if(v){
     var tb=TURNI[sid]||'',long=v.n.length>5;
-    el.classList.remove('free');el.style.setProperty('--c',colorOf(v));if(v.x){el.style.setProperty('--c2',stOf(v.x)[1]);el.classList.add('x2')}else{el.style.removeProperty('--c2');el.classList.remove('x2')}el.style.setProperty('--nfs',long?(v.n.length>7?.42:.52):1);
+    el.classList.remove('free');el.style.setProperty('--c',colorOf(v));el.style.setProperty('--t',tipoOf(v).colore);if(v.x){el.style.setProperty('--c2',stOf(v.x)[1]);el.classList.add('x2')}else{el.style.removeProperty('--c2');el.classList.remove('x2')}el.style.setProperty('--nfs',long?(v.n.length>7?.42:.52):1);
     el.classList.toggle('low',isPura(v.s)||lname(v.s).indexOf('manut')>-1);el.classList.toggle('bob',isTemp(v.s));
     el.classList.toggle('tmp',!!(v.prop&&v.prop!==sid));el.classList.toggle('fer',v.s==='ferma'||v.s==='fermat');el.classList.toggle('call',stOf(v.s)[0].toUpperCase().indexOf('CHIAMAT')>-1);el.classList.toggle('inoff',!!offOf(v.id));
-    el.innerHTML=ISO+'<span class="sid'+(shortSid(sid).length>=8?' l8':'')+'">'+esc(shortSid(sid))+(v.prop===sid?' ⌂':'')+'</span><span class="dot"></span><span class="num">'+esc(v.n)+'</span><span class="meta">'+(offOf(v.id)?'🔧 '+offOf(v.id)+' · ':'')+esc(v.model||tipoOf(v).code)+(v.s===dispId()?'':' · '+esc(shortSt(v.s)))+(v.x?' · '+esc(shortSt(v.x)):'')+'</span>'+(function(){var rs=revStatus(v.n);return rs&&rs.cls!=='ok'?'<span class="rvi" title="Revisione: '+esc(rs.data)+'">'+rs.icon+'</span>':''})()+'<span class="tb'+(tb?'':' add')+'" data-t="'+esc(tb)+'">'+(tb?esc(tb):'+')+'</span>';
+    el.innerHTML=ISO+'<span class="sid'+(shortSid(sid).length>=8?' l8':'')+'">'+esc(shortSid(sid))+(v.prop===sid?' ⌂':'')+'</span><span class="dot" title="Tipologia: '+esc(tipoOf(v).nome)+'"></span><span class="num">'+esc(v.n)+'</span><span class="meta">'+(offOf(v.id)?'🔧 '+offOf(v.id)+' · ':'')+esc(v.model||tipoOf(v).code)+(v.s===dispId()?'':' · '+esc(shortSt(v.s)))+(v.x?' · '+esc(shortSt(v.x)):'')+'</span>'+(function(){var rs=revStatus(v.n);return rs&&rs.cls!=='ok'?'<span class="rvi" title="Revisione: '+esc(rs.data)+'">'+rs.icon+'</span>':''})()+'<span class="tb'+(tb?'':' add')+'" data-t="'+esc(tb)+'">'+(tb?esc(tb):'+')+'</span>';
     el.setAttribute('aria-label','Stallo '+sid+', mezzo '+v.n+', '+stOf(v.s)[0]+(v.x?' + '+stOf(v.x)[0]:'')+(offOf(v.id)?', in officina '+offOf(v.id):''));
     el.draggable=true;
   }else{
@@ -1413,7 +1424,7 @@ function paintStall(sid){
     el.setAttribute('aria-label','Stallo '+sid+' libero');el.draggable=false;
   }
 }
-function repaintAll(){stallIds().forEach(paintStall)}
+function repaintAll(){stallIds().forEach(paintStall);var tl=$('#tleg');if(tl)tl.innerHTML='<b>Tipologia</b>'+TL.filter(function(t){return V.some(function(v){return v.tipo===t.id})}).map(function(t){return '<span><i style="--t:'+esc(t.colore)+'"></i>'+esc(t.nome)+'</span>'}).join('')}
 function paintCorsie(){
   CORSIE.forEach(function(c){
     var n=0;for(var i=1;i<=c.slots;i++)if(atStall(c.id+'-'+i))n++;
@@ -3528,7 +3539,6 @@ function menuItems(){
     {ic:'⇄',l:'Scambio',s:S.swap?'ON':'',fn:toggleSwap},
     {ic:'⛶',l:'Modalità display',fn:toggleDisplay},
     {ic:'🎨',l:'Aspetto: palette e font',fn:function(){look.classList.add('open')}},
-    {ic:'◇',l:'Vista 3D / 2D',s:S.v3d?'3D':'2D',fn:function(){apply3d(!S.v3d);buildMenu()}},
     {ic:light?'🌙':'☀',l:light?'Tema scuro':'Tema chiaro',fn:toggleTema},
     {dz:1},
     {ic:'⏱',l:'Azzera turni',fn:doAzzeraTurni},{ic:'🏠',l:'Riposiziona tutte',fn:openRipos},
@@ -3830,10 +3840,10 @@ setStatus('conn');buildMenu();paintUser();(function loop(){tickClock();setTimeou
 if(ls('dtf_compact')==='1')document.body.classList.add('compact');
 var rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 window.addEventListener('storage',function(e){if(e.key==='dtf_pal'&&e.newValue!=null&&PALS[+e.newValue]&&+e.newValue!==S.pal)applyPal(+e.newValue)});
-applyPal(+(ls('dtf_pal')||0));applyFont(+(ls('dtf_font')||0));applyStyle(ls('dtf_style')||'solid');applyCol(ls('dtf_col')||'stato');
+applyPal(+(ls('dtf_pal')||0));applyFont(+(ls('dtf_font')||0));applyStyle(ls('dtf_style')||'solid');applyCol('stato');
 (function(){var p=ls('dtf_px');applyPx(p===null?'neon':(p==='none'?'':p),true)})();
 applyMotion(ls('dtf_motion')===null?!rm:ls('dtf_motion')==='1');
-apply3d(ls('dtf_3d')===null?true:ls('dtf_3d')==='1');
+apply3d(true);
 moveInd();
 window.addEventListener('resize',function(){layoutFit();moveInd();fitStage()});
 if(window.ResizeObserver)new ResizeObserver(fitStage).observe(board);
